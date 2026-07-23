@@ -18,6 +18,7 @@ import type { CarbonIconType } from '@carbon/icons-react';
 import SEO from '@shared/components/content/SEO';
 import SignatureComponent from '@shared/components/ui/SignatureComponent';
 import KaratayLogo from '@shared/components/ui/KaratayLogo';
+import ArtekBilingualLogo from '@shared/components/ui/ArtekBilingualLogo';
 import PgpKey from '@shared/components/ui/PgpKey';
 import DinoGame from '@shared/components/games/DinoGame';
 import { useLocale } from '@shared/hooks';
@@ -64,8 +65,16 @@ interface EducationItem {
   logo: string;
 }
 
+interface ExperienceItem {
+  logo: string;
+  company: string;
+  role: string;
+  period: string;
+}
+
 interface HomeContent {
   intro: { role: string; name: string; summary: string; links: CtaLink[] };
+  experience: { title: string; items: ExperienceItem[] };
   projects: { title: string; items: ProjectItem[] };
   academics: AcademicContent;
   education: { title: string; items: EducationItem[] };
@@ -88,6 +97,7 @@ const ICON_MAP: Record<string, CarbonIconType> = {
 // ICON_MAP) — each logo is its own theme/locale-aware component.
 const LOGO_MAP: Record<string, React.FC<{ className?: string; label?: string }>> = {
   karatay: KaratayLogo,
+  artek: ArtekBilingualLogo,
 };
 
 const renderLinks = (links: CtaLink[], extra?: React.ReactNode) => (
@@ -143,6 +153,25 @@ const HomePage: React.FC = () => {
             <p className="home-intro__summary">{content.intro.summary}</p>
             {renderLinks(content.intro.links, <PgpKey />)}
             <SignatureComponent className="home-intro__signature" />
+          </Column>
+
+          {/* Work experience */}
+          <Column lg={16} md={8} sm={4} className="home-section">
+            <h2 className="home-section__title">{content.experience.title}</h2>
+            {content.experience.items.map((exp) => {
+              const Logo = LOGO_MAP[exp.logo];
+              return (
+                <div key={exp.company} className="home-experience">
+                  {Logo && <Logo className="home-experience__logo" label={exp.company} />}
+                  <div className="home-experience__body">
+                    <p className="home-experience__role">{exp.role}</p>
+                    <p className="home-experience__meta">
+                      {exp.company} · {exp.period}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </Column>
 
           {/* Featured projects */}

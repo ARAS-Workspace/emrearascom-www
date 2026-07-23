@@ -71,6 +71,39 @@
   border-bottom: 1px solid var(--cds-border-subtle);
 }
 
+// ── Experience ─────────────────────────────────────────────────────
+.home-experience {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.$spacing-05;
+  align-items: flex-start;
+}
+
+.home-experience__logo {
+  display: block;
+  inline-size: 24rem;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+.home-experience__body {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.$spacing-01;
+}
+
+.home-experience__role {
+  @include type.type-style('heading-compact-02');
+  color: var(--cds-text-primary);
+  margin: 0;
+}
+
+.home-experience__meta {
+  @include type.type-style('body-compact-01');
+  color: var(--cds-text-secondary);
+  margin: 0;
+}
+
 // ── Projects ───────────────────────────────────────────────────────
 .home-projects {
   display: grid;

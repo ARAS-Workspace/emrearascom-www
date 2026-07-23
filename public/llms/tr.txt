@@ -18,6 +18,10 @@ Gizlilik odaklı ağ sistemleri ve yapay zeka destekli araçlar geliştiriyorum.
 - [E-posta](mailto:emre@aras.tc)
 - PGP genel anahtarı sayfada bir modal içinde sunulur.
 
+## İş / Deneyim
+
+- **ARTEK İnovasyon Ar-Ge Sanayi ve Ticaret Limited Şirketi** — Ar-Ge Müdürü · 2024 – Günümüz
+
 ## Öne Çıkan Projeler
 
 - [Phantom-WG](https://github.com/ARAS-Workspace/phantom-wg): kendi sunucunuzda WireGuard VPN altyapısı kurmanızı ve yönetmenizi sağlayan modüler araç — sansüre dayanıklı bağlantılar, çok katmanlı şifreleme ve gelişmiş gizlilik senaryoları (WireGuard, VPN, Sansür Direnci, Gizlilik).

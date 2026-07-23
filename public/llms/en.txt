@@ -18,6 +18,10 @@ I build privacy-focused network systems and AI-assisted tooling. I work at ARTEK
 - [Email](mailto:emre@aras.tc)
 - PGP public key is shown in a modal on the page.
 
+## Work Experience
+
+- **ARTEK İnovasyon Ar-Ge Sanayi ve Ticaret Limited Şirketi** — R&D Manager · 2024 – Present
+
 ## Featured Projects
 
 - [Phantom-WG](https://github.com/ARAS-Workspace/phantom-wg): a modular tool for setting up and managing WireGuard VPN infrastructure on your own server — censorship-resistant connections, multi-layer encryption and advanced privacy scenarios (WireGuard, VPN, Censorship Resistance, Privacy).

@@ -8,6 +8,17 @@
       { "label": "Email", "href": "mailto:emre@aras.tc", "icon": "email" }
     ]
   },
+  "experience": {
+    "title": "Work Experience",
+    "items": [
+      {
+        "logo": "artek",
+        "company": "ARTEK İnovasyon Ar-Ge Sanayi ve Ticaret Limited Şirketi",
+        "role": "R&D Manager",
+        "period": "2024 – Present"
+      }
+    ]
+  },
   "projects": {
     "title": "Featured Projects",
     "items": [

@@ -8,6 +8,17 @@
       { "label": "E-posta", "href": "mailto:emre@aras.tc", "icon": "email" }
     ]
   },
+  "experience": {
+    "title": "İş / Deneyim",
+    "items": [
+      {
+        "logo": "artek",
+        "company": "ARTEK İnovasyon Ar-Ge Sanayi ve Ticaret Limited Şirketi",
+        "role": "Ar-Ge Müdürü",
+        "period": "2024 – Günümüz"
+      }
+    ]
+  },
   "projects": {
     "title": "Öne Çıkan Projeler",
     "items": [
