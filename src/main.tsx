@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 
 import '@shared/styles/carbon-config.scss';
+import '@shared/styles/print.scss';
 
 import { printConsoleBranding } from '@shared/utils/console-branding';
 printConsoleBranding();

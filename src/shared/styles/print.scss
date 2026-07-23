@@ -1,0 +1,129 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Rıza Emre ARAS <r.emrearas@proton.me> — part of emrearas.com.
+
+// Print / PDF stylesheet. The browser's "Save as PDF" and a physical print both
+// go through @media print, so this single sheet is the whole PDF-export story:
+// the app chrome (header nav, theme + language switches, footer), the interactive
+// PGP trigger and the DinoGame easter egg are dropped, colours are forced to a
+// light-on-white palette regardless of the on-screen theme, and blocks are kept
+// whole across page breaks — leaving just the CV.
+
+@media print {
+  // ── Force a light palette (even when printing from the dark theme) ──
+  :root,
+  :root[data-carbon-theme='white'],
+  :root[data-carbon-theme='g100'] {
+    --cds-background: #ffffff;
+    --cds-layer-01: #ffffff;
+    --cds-layer-02: #ffffff;
+    --cds-layer-hover-01: transparent;
+    --cds-text-primary: #161616;
+    --cds-text-secondary: #525252;
+    --cds-text-helper: #6f6f6f;
+    --cds-link-primary: #0043ce;
+    --cds-border-subtle: #c6c6c6;
+    --cds-border-strong: #8d8d8d;
+    --cds-icon-primary: #161616;
+    --cds-icon-secondary: #525252;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #161616 !important;
+  }
+
+  // ── Drop everything that isn't the CV itself ──────────────────────
+  .cds--header,
+  .cds--side-nav,
+  .cds--skip-to-content,
+  .footer,
+  .home-easter-egg,
+  .home-pgp-trigger {
+    display: none !important;
+  }
+
+  // Header is gone → reclaim its fixed-header offset so the CV starts at the top.
+  .cds--content,
+  .blog-shell {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .home-page {
+    padding: 0 !important;
+  }
+
+  // Tighten the generous on-screen section rhythm for paper.
+  .home-grid {
+    row-gap: 1.75rem !important;
+  }
+
+  // ── Keep blocks whole across page breaks ──────────────────────────
+  .home-intro,
+  .home-section,
+  .home-experience,
+  .home-education,
+  .home-publication,
+  .home-project-tile {
+    break-inside: avoid;
+  }
+
+  // ── Flatten interactive chrome into clean print blocks ────────────
+  // Tile hover/fill is meaningless on paper; a hairline border is enough.
+  .home-project-tile {
+    background: transparent !important;
+    border: 1px solid var(--cds-border-subtle) !important;
+  }
+
+  // Browsers strip backgrounds in print, so render tags as bordered chips.
+  .cds--tag {
+    background: transparent !important;
+    color: #161616 !important;
+    border: 1px solid var(--cds-border-strong) !important;
+  }
+
+  a,
+  .cds--link {
+    color: var(--cds-link-primary) !important;
+    text-decoration: none !important;
+  }
+
+  // ── Logos: force the visible (light) rendering ────────────────────
+  // Both logos are theme-driven and go WHITE in the dark theme, so on white
+  // paper they vanish and leave their height as an empty gap. Pin them to the
+  // light lockup regardless of the on-screen theme.
+  //
+  // Karatay (CSS-driven): show the light symbol, hide the white one, ink the text.
+  .karatay-logo__symbol--light {
+    display: inline-flex !important;
+  }
+  .karatay-logo__symbol--dark {
+    display: none !important;
+  }
+  .karatay-logo__text .cls-3,
+  .karatay-logo__text .cls-4 {
+    fill: #231f20 !important;
+  }
+
+  // ARTEK (JS-driven inline <style>): override its stroke/fill to dark ink.
+  #artek-logo .logo-stroke {
+    stroke: #414042 !important;
+  }
+  #artek-logo .logo-fill {
+    fill: #414042 !important;
+  }
+
+  // Signature: paints `currentColor` → text-primary, so it also goes faint/white
+  // from the dark theme. Pin it to dark ink so it prints crisp.
+  .signature {
+    color: #161616 !important;
+  }
+  .signature svg {
+    fill: #161616 !important;
+  }
+
+  @page {
+    margin: 1.5cm;
+  }
+}
