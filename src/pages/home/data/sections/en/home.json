@@ -1,0 +1,108 @@
+{
+  "intro": {
+    "role": "Computer Engineer",
+    "name": "Rıza Emre ARAS",
+    "summary": "I build privacy-focused network systems and AI-assisted tooling. I work at ARTEK and ship open-source projects in my spare time.",
+    "links": [
+      { "label": "GitHub", "href": "https://github.com/remrearas", "icon": "github", "external": true },
+      { "label": "Email", "href": "mailto:r.emrearas@proton.me", "icon": "email" }
+    ]
+  },
+  "projects": {
+    "title": "Featured Projects",
+    "items": [
+      {
+        "name": "Phantom-WG",
+        "description": "Phantom-WG is a modular tool for setting up and managing WireGuard VPN infrastructure on your own server. Beyond basic VPN management, it provides censorship-resistant connections, multi-layer encryption, and advanced privacy scenarios.",
+        "href": "https://www.phantom.tc",
+        "tags": ["WireGuard", "VPN", "Censorship Resistance", "Privacy"],
+        "external": true
+      },
+      {
+        "name": "ARTEK Homepage",
+        "description": "ARTEK Homepage is a modern, multilingual corporate website built with React and the Carbon Design System.",
+        "href": "https://www.artek.tc",
+        "tags": ["Company", "Technology"],
+        "external": true
+      },
+      {
+        "name": "Claude-KVM",
+        "description": "Claude KVM is an MCP tool that controls remote desktop environments over VNC. It consists of a thin JS proxy layer (MCP server) and a platform-native Swift VNC daemon running on your macOS system.",
+        "href": "https://github.com/remrearas/claude-kvm",
+        "tags": ["MCP", "VNC", "Automation"],
+        "external": true
+      },
+      {
+        "name": "EU AI Act RAG",
+        "description": "A Full-Featured RAG Pipeline Example Based on Regulation (EU) 2024/1689 — The European AI Act",
+        "href": "https://github.com/remrearas/eu-ai-act-rag",
+        "tags": ["RAG", "LLM", "EU AI Act"],
+        "external": true
+      }
+    ]
+  },
+  "academics": {
+    "title": "Academic Work",
+    "author": "R. E. Aras",
+    "profile": {
+      "label": "Google Scholar profile",
+      "href": "https://scholar.google.com/citations?hl=tr&user=3Cp2Dc4AAAAJ"
+    },
+    "publications": [
+      {
+        "title": "A discovery and analysis engine for semantic web",
+        "authors": "S. Yumusak, A. Kamilaris, E. Dogdu, H. Kodaz, E. Uysal, R. E. Aras",
+        "venue": "Companion Proceedings of the Web Conference (WWW)",
+        "year": "2018"
+      },
+      {
+        "title": "SpEnD portal: Linked data discovery using SPARQL endpoints",
+        "authors": "S. Yumusak, R. E. Aras, E. Uysal, E. Dogdu, H. Kodaz, K. Oztoprak",
+        "venue": "IEEE International Conference on Big Data",
+        "year": "2017"
+      }
+    ]
+  },
+  "education": {
+    "title": "Education",
+    "items": [
+      {
+        "logo": "karatay",
+        "school": "KTO Karatay University",
+        "degree": "Computer Engineering",
+        "level": "Bachelor's Degree",
+        "period": "2015 – 2020"
+      }
+    ]
+  },
+  "skills": {
+    "title": "Skills",
+    "items": [
+      "TypeScript",
+      "JavaScript",
+      "Python",
+      "Go",
+      "Rust",
+      "Swift",
+      "C / FFI",
+      "React",
+      "Cloudflare Workers",
+      "Docker",
+      "WireGuard",
+      "RAG / LLM",
+      "SPARQL & Semantic Web",
+      "MCP",
+      "CI/CD",
+      "System Automation",
+      "Privacy & Network Security"
+    ]
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "Feel free to reach out for projects and collaborations.",
+    "links": [
+      { "label": "github.com/remrearas", "href": "https://github.com/remrearas", "icon": "github", "external": true },
+      { "label": "r.emrearas@proton.me", "href": "mailto:r.emrearas@proton.me", "icon": "email" }
+    ]
+  }
+}

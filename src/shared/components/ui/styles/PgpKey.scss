@@ -1,0 +1,53 @@
+@use '@carbon/react/scss/breakpoint' as bp;
+
+// The trigger is a real <button> (it opens a modal) dressed as one of the intro
+// links: it already carries .home-link (inline-flex, centred), so here we only
+// strip the button chrome and borrow the Carbon link colours.
+.home-pgp-trigger {
+  gap: 0.25rem;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--cds-link-primary);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--cds-link-primary-hover);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--cds-focus);
+    outline-offset: 2px;
+  }
+}
+
+.home-pgp-trigger__icon {
+  fill: currentColor;
+}
+
+.home-pgp-snippet {
+  inline-size: 100%;
+}
+
+// Modal — full-screen on mobile so the page never shows behind/below it (the
+// same treatment the phantom-wg react-spa gives its modals). On larger screens
+// it grows to fit its content instead of a fixed height.
+.pgp-modal {
+  @include bp.breakpoint-down(md) {
+    .cds--modal-container {
+      inline-size: 100%;
+      block-size: 100%;
+      max-block-size: 100%;
+      border-radius: 0;
+    }
+  }
+
+  @include bp.breakpoint(md) {
+    .cds--modal-container {
+      block-size: auto;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+@use '@carbon/react/scss/spacing' as spacing;
+
+// Middle region of the sticky-footer flex column (.app) — grows to fill the
+// viewport so the Footer stays at the bottom on short pages. Carbon <Content>
+// contributes its own inner padding.
+.blog-shell {
+  flex: 1;
+  width: 100%;
+}

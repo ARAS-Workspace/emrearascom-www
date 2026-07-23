@@ -1,0 +1,17 @@
+// The signature is one inlined monochrome SVG that paints in `currentColor`, so
+// binding `color` to --cds-text-primary re-inks it with the theme (near-black on
+// light, near-white on dark). The viewBox (1129.18 × 467.6) holds the aspect, so
+// only the width is set here; consumers place it.
+.signature {
+  display: inline-block;
+  line-height: 0;
+  color: var(--cds-text-primary);
+
+  svg {
+    display: block;
+    inline-size: 13rem;
+    max-inline-size: 100%;
+    block-size: auto;
+    fill: currentColor;
+  }
+}

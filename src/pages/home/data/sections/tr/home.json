@@ -1,0 +1,109 @@
+{
+  "intro": {
+    "role": "Bilgisayar Mühendisi",
+    "name": "Rıza Emre ARAS",
+    "summary": "Gizlilik odaklı ağ sistemleri ve yapay zeka destekli araçlar geliştiriyorum. ARTEK bünyesinde çalışıyor, boş vakitlerimde açık kaynak projeler üretiyorum.",
+    "links": [
+      { "label": "GitHub", "href": "https://github.com/remrearas", "icon": "github", "external": true },
+      { "label": "E-posta", "href": "mailto:emre@aras.tc", "icon": "email" }
+    ]
+  },
+  "projects": {
+    "title": "Öne Çıkan Projeler",
+    "items": [
+      {
+        "name": "Phantom-WG",
+        "description": "Phantom-WG, kendi sunucunuzda WireGuard VPN altyapısı kurmanızı ve yönetmenizi sağlayan modüler bir araçtır. Temel VPN yönetiminin ötesinde; sansüre dayanıklı bağlantılar, çok katmanlı şifreleme ve gelişmiş gizlilik senaryoları sunar.",
+        "href": "https://github.com/ARAS-Workspace/phantom-wg",
+        "tags": ["WireGuard", "VPN", "Sansür Direnci", "Gizlilik"],
+        "external": true
+      },
+      {
+        "name": "ARTEK Homepage",
+        "description": "ARTEK Homepage, React ve Carbon Design System ile oluşturulmuş, çoklu dil desteğine sahip modern kurumsal web sitesi projesidir.",
+        "href": "https://github.com/ARAS-Workspace/artek-homepage",
+        "tags": ["React", "Carbon Design"],
+        "external": true
+      },
+      {
+        "name": "Claude-KVM",
+        "description": "Claude KVM, VNC protokolü üzerinden uzak masaüstü ortamlarını kontrol eden bir MCP aracıdır. İnce bir JS proxy katmanı (MCP server) ve MacOS sisteminizde çalışan platformunuza native bir Swift VNC daemon'dan oluşur.",
+        "href": "https://github.com/ARAS-Workspace/claude-kvm",
+        "tags": ["MCP", "VNC", "AI Otomasyonu", "Swift"],
+        "external": true
+      },
+      {
+        "name": "EU AI Act RAG",
+        "description": "Avrupa Yapay Zeka Yasası — Regulation (EU) 2024/1689 Temelli Tam Donanımlı RAG Pipeline Örneği",
+        "href": "https://github.com/ARAS-Workspace/eu-ai-act-rag",
+        "tags": ["RAG", "LLM", "AB YZ Yasası", "EUR-Lex" , "SPARQL", "Anlamsal Ağ"],
+        "external": true
+      }
+    ]
+  },
+  "academics": {
+    "title": "Akademik Çalışmalar",
+    "author": "R. E. Aras",
+    "profile": {
+      "label": "Google Scholar profili",
+      "href": "https://scholar.google.com/citations?hl=tr&user=3Cp2Dc4AAAAJ"
+    },
+    "publications": [
+      {
+        "title": "A discovery and analysis engine for semantic web",
+        "authors": "S. Yumusak, A. Kamilaris, E. Dogdu, H. Kodaz, E. Uysal, R. E. Aras",
+        "venue": "Companion Proceedings of the Web Conference (WWW)",
+        "year": "2018"
+      },
+      {
+        "title": "SpEnD portal: Linked data discovery using SPARQL endpoints",
+        "authors": "S. Yumusak, R. E. Aras, E. Uysal, E. Dogdu, H. Kodaz, K. Oztoprak",
+        "venue": "IEEE International Conference on Big Data",
+        "year": "2017"
+      }
+    ]
+  },
+  "education": {
+    "title": "Eğitim",
+    "items": [
+      {
+        "logo": "karatay",
+        "school": "KTO Karatay Üniversitesi",
+        "degree": "Bilgisayar Mühendisliği",
+        "level": "Lisans",
+        "period": "2015 – 2020"
+      }
+    ]
+  },
+  "skills": {
+    "title": "Yetenekler",
+    "items": [
+      "TypeScript",
+      "JavaScript",
+      "Python",
+      "Go",
+      "Rust",
+      "Swift",
+      "C / FFI",
+      "React",
+      "Cloudflare Workers",
+      "Docker",
+      "WireGuard",
+      "RAG / LLM",
+      "SPARQL & Anlamsal Ağ",
+      "MCP",
+      "CI/CD",
+      "Sistem Otomasyonu",
+      "Gizlilik & Ağ Güvenliği"
+    ]
+  },
+  "contact": {
+    "title": "İletişim",
+    "description": "Projeler ve iş birlikleri için bana ulaşabilirsiniz.",
+    "links": [
+      { "label": "github.com/remrearas", "href": "https://github.com/remrearas", "icon": "github", "external": true },
+      { "label": "github.com/ARAS-Workspace", "href": "https://github.com/ARAS-Workspace", "icon": "github", "external": true },
+      { "label": "emre@aras.tc", "href": "mailto:emre@aras.tc", "icon": "email" }
+    ]
+  }
+}

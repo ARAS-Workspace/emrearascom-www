@@ -1,0 +1,77 @@
+> **emrearas.com — makine-okunur sayfa içeriği.**
+>
+> **TR:** Rıza Emre ARAS'ın kişisel sitesinin ana sayfası: kısa tanıtım, öne
+> çıkan projeler, akademik çalışmalar, eğitim, yetenekler ve iletişim.
+>
+> **EN:** Home page of Rıza Emre ARAS's personal site: short bio, featured
+> projects, academic work, education, skills and contact.
+
+**path:** / · **locale:** tr · **en:** https://www.emrearas.com/llms.txt?locale=en
+
+# Rıza Emre ARAS
+
+**Bilgisayar Mühendisi**
+
+Gizlilik odaklı ağ sistemleri ve yapay zeka destekli araçlar geliştiriyorum. ARTEK bünyesinde çalışıyor, boş vakitlerimde açık kaynak projeler üretiyorum.
+
+- GitHub: https://github.com/remrearas
+- E-posta: emre@aras.tc
+- PGP genel anahtarı sayfada bir modal içinde sunulur.
+
+## Öne Çıkan Projeler
+
+### Phantom-WG
+
+Phantom-WG, kendi sunucunuzda WireGuard VPN altyapısı kurmanızı ve yönetmenizi sağlayan modüler bir araçtır. Temel VPN yönetiminin ötesinde; sansüre dayanıklı bağlantılar, çok katmanlı şifreleme ve gelişmiş gizlilik senaryoları sunar.
+
+- Etiketler: WireGuard, VPN, Sansür Direnci, Gizlilik
+- Bağlantı: https://github.com/ARAS-Workspace/phantom-wg
+
+### ARTEK Homepage
+
+ARTEK Homepage, React ve Carbon Design System ile oluşturulmuş, çoklu dil desteğine sahip modern kurumsal web sitesi projesidir.
+
+- Etiketler: React, Carbon Design
+- Bağlantı: https://github.com/ARAS-Workspace/artek-homepage
+
+### Claude-KVM
+
+Claude KVM, VNC protokolü üzerinden uzak masaüstü ortamlarını kontrol eden bir MCP aracıdır. İnce bir JS proxy katmanı (MCP server) ve MacOS sisteminizde çalışan platformunuza native bir Swift VNC daemon'dan oluşur.
+
+- Etiketler: MCP, VNC, AI Otomasyonu, Swift
+- Bağlantı: https://github.com/ARAS-Workspace/claude-kvm
+
+### EU AI Act RAG
+
+Avrupa Yapay Zeka Yasası — Regulation (EU) 2024/1689 Temelli Tam Donanımlı RAG Pipeline Örneği.
+
+- Etiketler: RAG, LLM, AB YZ Yasası, EUR-Lex, SPARQL, Anlamsal Ağ
+- Bağlantı: https://github.com/ARAS-Workspace/eu-ai-act-rag
+
+## Akademik Çalışmalar
+
+### A discovery and analysis engine for semantic web
+
+S. Yumusak, A. Kamilaris, E. Dogdu, H. Kodaz, E. Uysal, **R. E. Aras** — Companion Proceedings of the Web Conference (WWW) · 2018
+
+### SpEnD portal: Linked data discovery using SPARQL endpoints
+
+S. Yumusak, **R. E. Aras**, E. Uysal, E. Dogdu, H. Kodaz, K. Oztoprak — IEEE International Conference on Big Data · 2017
+
+Google Scholar profili: https://scholar.google.com/citations?hl=tr&user=3Cp2Dc4AAAAJ
+
+## Eğitim
+
+**KTO Karatay Üniversitesi** — Bilgisayar Mühendisliği (Lisans) · 2015 – 2020
+
+## Yetenekler
+
+TypeScript, JavaScript, Python, Go, Rust, Swift, C / FFI, React, Cloudflare Workers, Docker, WireGuard, RAG / LLM, SPARQL & Anlamsal Ağ, MCP, CI/CD, Sistem Otomasyonu, Gizlilik & Ağ Güvenliği
+
+## İletişim
+
+Projeler ve iş birlikleri için bana ulaşabilirsiniz.
+
+- github.com/remrearas: https://github.com/remrearas
+- github.com/ARAS-Workspace: https://github.com/ARAS-Workspace
+- emre@aras.tc: mailto:emre@aras.tc

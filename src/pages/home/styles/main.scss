@@ -1,0 +1,219 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Rıza Emre ARAS <r.emrearas@proton.me> — part of emrearas.com.
+
+@use '@carbon/react/scss/spacing' as spacing;
+@use '@carbon/react/scss/type/index' as type;
+@use '@carbon/react/scss/breakpoint' as bp;
+
+.home-page {
+  padding: spacing.$spacing-09 0 spacing.$spacing-10;
+
+  @include bp.breakpoint-down(md) {
+    padding: spacing.$spacing-07 0 spacing.$spacing-09;
+  }
+}
+
+.home-grid {
+  row-gap: spacing.$spacing-10;
+}
+
+// ── Intro ──────────────────────────────────────────────────────────
+.home-intro__eyebrow {
+  @include type.type-style('label-02');
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cds-text-secondary);
+  margin: 0 0 spacing.$spacing-03;
+}
+
+.home-intro__name {
+  @include type.type-style('heading-06');
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--cds-text-primary);
+  margin: 0 0 spacing.$spacing-05;
+
+  @include bp.breakpoint-down(md) {
+    @include type.type-style('heading-05');
+  }
+}
+
+.home-intro__summary {
+  @include type.type-style('body-long-02');
+  line-height: 1.6;
+  color: var(--cds-text-secondary);
+  max-width: 44rem;
+  margin: 0 0 spacing.$spacing-06;
+}
+
+.home-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.$spacing-06;
+  align-items: center;
+}
+
+.home-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.home-intro__signature {
+  margin-top: spacing.$spacing-07;
+}
+
+// ── Section headings ───────────────────────────────────────────────
+.home-section__title {
+  @include type.type-style('heading-04');
+  color: var(--cds-text-primary);
+  margin: 0 0 spacing.$spacing-06;
+  padding-bottom: spacing.$spacing-03;
+  border-bottom: 1px solid var(--cds-border-subtle);
+}
+
+// ── Projects ───────────────────────────────────────────────────────
+.home-projects {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: spacing.$spacing-05;
+
+  @include bp.breakpoint-down(md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-project-tile {
+  height: 100%;
+  border: 1px solid var(--cds-border-subtle);
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: var(--cds-border-strong);
+    background: var(--cds-layer-hover-01);
+  }
+}
+
+.home-project-tile__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: spacing.$spacing-03;
+  margin-bottom: spacing.$spacing-03;
+}
+
+.home-project-tile__name {
+  @include type.type-style('heading-compact-02');
+  color: var(--cds-text-primary);
+  margin: 0;
+}
+
+.home-project-tile__arrow {
+  flex-shrink: 0;
+  color: var(--cds-link-primary);
+}
+
+.home-project-tile__desc {
+  @include type.type-style('body-compact-01');
+  color: var(--cds-text-secondary);
+  margin: 0 0 spacing.$spacing-05;
+}
+
+.home-project-tile__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.$spacing-03;
+}
+
+.home-project-tile__tag {
+  margin: 0;
+}
+
+// ── Academic work ──────────────────────────────────────────────────
+.home-publications {
+  list-style: none;
+  margin: 0 0 spacing.$spacing-06;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: spacing.$spacing-06;
+}
+
+.home-publication {
+  padding-inline-start: spacing.$spacing-05;
+  border-inline-start: 2px solid var(--cds-border-subtle);
+}
+
+.home-publication__title {
+  @include type.type-style('heading-compact-02');
+  color: var(--cds-text-primary);
+  margin: 0 0 spacing.$spacing-02;
+}
+
+.home-publication__authors {
+  @include type.type-style('body-compact-01');
+  color: var(--cds-text-secondary);
+  margin: 0 0 spacing.$spacing-01;
+}
+
+.home-publication__self {
+  color: var(--cds-text-primary);
+  font-weight: 600;
+}
+
+.home-publication__venue {
+  @include type.type-style('label-01');
+  color: var(--cds-text-helper);
+  font-style: italic;
+  margin: 0;
+}
+
+// ── Education ───────────────────────────────────────────────────────
+.home-education {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.$spacing-05;
+  align-items: flex-start;
+}
+
+.home-education__logo {
+  --karatay-h: 2.75rem;
+}
+
+.home-education__body {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.$spacing-01;
+}
+
+.home-education__degree {
+  @include type.type-style('heading-compact-02');
+  color: var(--cds-text-primary);
+  margin: 0;
+}
+
+.home-education__meta {
+  @include type.type-style('body-compact-01');
+  color: var(--cds-text-secondary);
+  margin: 0;
+}
+
+// ── Skills ─────────────────────────────────────────────────────────
+.home-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.$spacing-03;
+}
+
+// ── Contact ────────────────────────────────────────────────────────
+.home-contact__desc {
+  @include type.type-style('body-long-01');
+  color: var(--cds-text-secondary);
+  margin: 0 0 spacing.$spacing-05;
+}
+
+// ── Easter egg — Phantom-ghost runner, unlabeled at the very bottom ──
+.home-easter-egg {
+  margin-top: spacing.$spacing-10;
+  padding-top: spacing.$spacing-09;
+  border-top: 1px solid var(--cds-border-subtle);
+}

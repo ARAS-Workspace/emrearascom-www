@@ -1,0 +1,98 @@
+// KTO Karatay wordmark, composed from a theme-driven SYMBOL + a locale-driven
+// TEXT. All four fragments are inlined; CSS reveals one symbol (by
+// data-carbon-theme) and one text (by data-locale). Consumers set --karatay-h
+// (the emblem's height); the wordmark tracks it, and both are baseline-centred
+// with a gap proportional to the height, reproducing the original lockup.
+.karatay-logo {
+  --karatay-h: 2.75rem;
+
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--karatay-h) * 0.2);
+  line-height: 0;
+}
+
+.karatay-logo__symbol,
+.karatay-logo__text {
+  display: none;
+}
+
+.karatay-logo__symbol svg {
+  display: block;
+  height: var(--karatay-h);
+  width: auto;
+}
+
+// The wordmark is the shorter, two-line block — ~0.75 of the emblem height.
+.karatay-logo__text svg {
+  display: block;
+  height: calc(var(--karatay-h) * 0.75);
+  width: auto;
+}
+
+// ── Colours ────────────────────────────────────────────────────────
+// Symbol, light: teal emblem (cls-1/cls-2) + dark frame & pillars (cls-3/cls-4).
+.karatay-logo__symbol--light {
+  .cls-1,
+  .cls-2 {
+    fill: #56c5d0;
+  }
+
+  .cls-3,
+  .cls-4 {
+    fill: #231f20;
+  }
+
+  .cls-2,
+  .cls-4 {
+    fill-rule: evenodd;
+  }
+}
+
+// Symbol, dark: the university's all-white art.
+.karatay-logo__symbol--dark {
+  .cls-1,
+  .cls-2 {
+    fill: #ffffff;
+  }
+
+  .cls-1 {
+    fill-rule: evenodd;
+  }
+}
+
+// Text: monochrome — dark ink on light, white on dark.
+.karatay-logo__text {
+  .cls-3,
+  .cls-4 {
+    fill: #231f20;
+  }
+}
+
+:root[data-carbon-theme='g100'] .karatay-logo__text {
+  .cls-3,
+  .cls-4 {
+    fill: #ffffff;
+  }
+}
+
+// ── Visibility: symbol by theme, text by locale ────────────────────
+.karatay-logo__symbol--light {
+  display: inline-flex;
+}
+
+:root[data-carbon-theme='g100'] .karatay-logo__symbol--light {
+  display: none;
+}
+
+:root[data-carbon-theme='g100'] .karatay-logo__symbol--dark {
+  display: inline-flex;
+}
+
+.karatay-logo[data-locale='tr'] .karatay-logo__text--tr {
+  display: inline-flex;
+}
+
+.karatay-logo[data-locale='en'] .karatay-logo__text--en {
+  display: inline-flex;
+}
