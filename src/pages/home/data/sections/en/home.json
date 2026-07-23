@@ -103,6 +103,7 @@
     "links": [
       { "label": "github.com/remrearas", "href": "https://github.com/remrearas", "icon": "github", "external": true },
       { "label": "github.com/ARAS-Workspace", "href": "https://github.com/ARAS-Workspace", "icon": "github", "external": true },
+      { "label": "linkedin.com/in/remrearas", "href": "https://www.linkedin.com/in/remrearas/", "icon": "linkedin", "external": true },
       { "label": "emre@aras.tc", "href": "mailto:emre@aras.tc", "icon": "email" }
     ]
   }

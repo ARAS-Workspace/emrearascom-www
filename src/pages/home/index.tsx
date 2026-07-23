@@ -12,7 +12,7 @@
 
 import React, { useMemo } from 'react';
 import { Grid, Column, ClickableTile, Tag, Link } from '@carbon/react';
-import { LogoGithub, Email, ArrowUpRight, Launch } from '@carbon/icons-react';
+import { LogoGithub, LogoLinkedin, Email, ArrowUpRight, Launch } from '@carbon/icons-react';
 import type { CarbonIconType } from '@carbon/icons-react';
 
 import SEO from '@shared/components/content/SEO';
@@ -80,6 +80,7 @@ const CONTENT_MAP: Record<'tr' | 'en', HomeContent> = {
 
 const ICON_MAP: Record<string, CarbonIconType> = {
   github: LogoGithub,
+  linkedin: LogoLinkedin,
   email: Email,
 };
 
