@@ -6,7 +6,7 @@
 > **EN:** Home page of Rıza Emre ARAS's personal site: short bio, featured
 > projects, academic work, education, skills and contact.
 
-**path:** / · **locale:** tr · **en:** https://www.emrearas.com/llms.txt?locale=en
+**path:** / · **locale:** tr · **en:** https://www.emrearas.com/llms-full.txt?locale=en
 
 # Rıza Emre ARAS
 
@@ -14,55 +14,26 @@
 
 Gizlilik odaklı ağ sistemleri ve yapay zeka destekli araçlar geliştiriyorum. ARTEK bünyesinde çalışıyor, boş vakitlerimde açık kaynak projeler üretiyorum.
 
-- GitHub: https://github.com/remrearas
-- E-posta: emre@aras.tc
+- [GitHub](https://github.com/remrearas)
+- [E-posta](mailto:emre@aras.tc)
 - PGP genel anahtarı sayfada bir modal içinde sunulur.
 
 ## Öne Çıkan Projeler
 
-### Phantom-WG
-
-Phantom-WG, kendi sunucunuzda WireGuard VPN altyapısı kurmanızı ve yönetmenizi sağlayan modüler bir araçtır. Temel VPN yönetiminin ötesinde; sansüre dayanıklı bağlantılar, çok katmanlı şifreleme ve gelişmiş gizlilik senaryoları sunar.
-
-- Etiketler: WireGuard, VPN, Sansür Direnci, Gizlilik
-- Bağlantı: https://github.com/ARAS-Workspace/phantom-wg
-
-### ARTEK Homepage
-
-ARTEK Homepage, React ve Carbon Design System ile oluşturulmuş, çoklu dil desteğine sahip modern kurumsal web sitesi projesidir.
-
-- Etiketler: React, Carbon Design
-- Bağlantı: https://github.com/ARAS-Workspace/artek-homepage
-
-### Claude-KVM
-
-Claude KVM, VNC protokolü üzerinden uzak masaüstü ortamlarını kontrol eden bir MCP aracıdır. İnce bir JS proxy katmanı (MCP server) ve MacOS sisteminizde çalışan platformunuza native bir Swift VNC daemon'dan oluşur.
-
-- Etiketler: MCP, VNC, AI Otomasyonu, Swift
-- Bağlantı: https://github.com/ARAS-Workspace/claude-kvm
-
-### EU AI Act RAG
-
-Avrupa Yapay Zeka Yasası — Regulation (EU) 2024/1689 Temelli Tam Donanımlı RAG Pipeline Örneği.
-
-- Etiketler: RAG, LLM, AB YZ Yasası, EUR-Lex, SPARQL, Anlamsal Ağ
-- Bağlantı: https://github.com/ARAS-Workspace/eu-ai-act-rag
+- [Phantom-WG](https://github.com/ARAS-Workspace/phantom-wg): kendi sunucunuzda WireGuard VPN altyapısı kurmanızı ve yönetmenizi sağlayan modüler araç — sansüre dayanıklı bağlantılar, çok katmanlı şifreleme ve gelişmiş gizlilik senaryoları (WireGuard, VPN, Sansür Direnci, Gizlilik).
+- [ARTEK Homepage](https://github.com/ARAS-Workspace/artek-homepage): React ve Carbon Design System ile oluşturulmuş, çoklu dil desteğine sahip modern kurumsal web sitesi (React, Carbon Design).
+- [Claude-KVM](https://github.com/ARAS-Workspace/claude-kvm): VNC protokolü üzerinden uzak masaüstü ortamlarını kontrol eden MCP aracı — ince bir JS proxy katmanı (MCP server) ve macOS'ta çalışan platforma native bir Swift VNC daemon (MCP, VNC, AI Otomasyonu, Swift).
+- [EU AI Act RAG](https://github.com/ARAS-Workspace/eu-ai-act-rag): Avrupa Yapay Zeka Yasası — Regulation (EU) 2024/1689 temelli tam donanımlı RAG pipeline örneği (RAG, LLM, AB YZ Yasası, EUR-Lex, SPARQL, Anlamsal Ağ).
 
 ## Akademik Çalışmalar
 
-### A discovery and analysis engine for semantic web
-
-S. Yumusak, A. Kamilaris, E. Dogdu, H. Kodaz, E. Uysal, **R. E. Aras** — Companion Proceedings of the Web Conference (WWW) · 2018
-
-### SpEnD portal: Linked data discovery using SPARQL endpoints
-
-S. Yumusak, **R. E. Aras**, E. Uysal, E. Dogdu, H. Kodaz, K. Oztoprak — IEEE International Conference on Big Data · 2017
-
-Google Scholar profili: https://scholar.google.com/citations?hl=tr&user=3Cp2Dc4AAAAJ
+- **A discovery and analysis engine for semantic web** — S. Yumusak, A. Kamilaris, E. Dogdu, H. Kodaz, E. Uysal, **R. E. Aras** — Companion Proceedings of the Web Conference (WWW) · 2018
+- **SpEnD portal: Linked data discovery using SPARQL endpoints** — S. Yumusak, **R. E. Aras**, E. Uysal, E. Dogdu, H. Kodaz, K. Oztoprak — IEEE International Conference on Big Data · 2017
+- [Google Scholar profili](https://scholar.google.com/citations?hl=tr&user=3Cp2Dc4AAAAJ): tüm yayınlar ve atıflar.
 
 ## Eğitim
 
-**KTO Karatay Üniversitesi** — Bilgisayar Mühendisliği (Lisans) · 2015 – 2020
+- **KTO Karatay Üniversitesi** — Bilgisayar Mühendisliği (Lisans) · 2015 – 2020
 
 ## Yetenekler
 
@@ -72,6 +43,6 @@ TypeScript, JavaScript, Python, Go, Rust, Swift, C / FFI, React, Cloudflare Work
 
 Projeler ve iş birlikleri için bana ulaşabilirsiniz.
 
-- github.com/remrearas: https://github.com/remrearas
-- github.com/ARAS-Workspace: https://github.com/ARAS-Workspace
-- emre@aras.tc: mailto:emre@aras.tc
+- [github.com/remrearas](https://github.com/remrearas)
+- [github.com/ARAS-Workspace](https://github.com/ARAS-Workspace)
+- [emre@aras.tc](mailto:emre@aras.tc)

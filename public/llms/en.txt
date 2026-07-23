@@ -14,55 +14,26 @@
 
 I build privacy-focused network systems and AI-assisted tooling. I work at ARTEK and ship open-source projects in my spare time.
 
-- GitHub: https://github.com/remrearas
-- Email: r.emrearas@proton.me
+- [GitHub](https://github.com/remrearas)
+- [Email](mailto:emre@aras.tc)
 - PGP public key is shown in a modal on the page.
 
 ## Featured Projects
 
-### Phantom-WG
-
-Phantom-WG is a modular tool for setting up and managing WireGuard VPN infrastructure on your own server. Beyond basic VPN management, it provides censorship-resistant connections, multi-layer encryption, and advanced privacy scenarios.
-
-- Tags: WireGuard, VPN, Censorship Resistance, Privacy
-- Link: https://www.phantom.tc
-
-### ARTEK
-
-ARTEK Homepage is a modern, multilingual corporate website built with React and the Carbon Design System.
-
-- Tags: Company, Technology
-- Link: https://www.artek.tc
-
-### Claude-KVM
-
-MCP server (macOS) — control remote desktops via VNC.
-
-- Tags: MCP, VNC, Automation
-- Link: https://github.com/remrearas/claude-kvm
-
-### eu-ai-act-rag
-
-EU AI Act RAG — end-to-end retrieval-augmented generation pipeline: SPARQL corpus builder, Cloudflare Workers AI backend, and Streamlit playground for querying Regulation (EU) 2024/1689.
-
-- Tags: RAG, LLM, EU AI Act
-- Link: https://github.com/remrearas/eu-ai-act-rag
+- [Phantom-WG](https://github.com/ARAS-Workspace/phantom-wg): a modular tool for setting up and managing WireGuard VPN infrastructure on your own server — censorship-resistant connections, multi-layer encryption and advanced privacy scenarios (WireGuard, VPN, Censorship Resistance, Privacy).
+- [ARTEK Homepage](https://github.com/ARAS-Workspace/artek-homepage): a modern, multilingual corporate website built with React and the Carbon Design System (React, Carbon Design).
+- [Claude-KVM](https://github.com/ARAS-Workspace/claude-kvm): an MCP tool that controls remote desktop environments over VNC — a thin JS proxy layer (MCP server) and a platform-native Swift VNC daemon on macOS (MCP, VNC, AI Automation, Swift).
+- [EU AI Act RAG](https://github.com/ARAS-Workspace/eu-ai-act-rag): a full-featured RAG pipeline example based on Regulation (EU) 2024/1689 — the European AI Act (RAG, LLM, EU AI Act, EUR-Lex, SPARQL, Semantic Web).
 
 ## Academic Work
 
-### A discovery and analysis engine for semantic web
-
-S. Yumusak, A. Kamilaris, E. Dogdu, H. Kodaz, E. Uysal, **R. E. Aras** — Companion Proceedings of the Web Conference (WWW) · 2018
-
-### SpEnD portal: Linked data discovery using SPARQL endpoints
-
-S. Yumusak, **R. E. Aras**, E. Uysal, E. Dogdu, H. Kodaz, K. Oztoprak — IEEE International Conference on Big Data · 2017
-
-Google Scholar profile: https://scholar.google.com/citations?hl=tr&user=3Cp2Dc4AAAAJ
+- **A discovery and analysis engine for semantic web** — S. Yumusak, A. Kamilaris, E. Dogdu, H. Kodaz, E. Uysal, **R. E. Aras** — Companion Proceedings of the Web Conference (WWW) · 2018
+- **SpEnD portal: Linked data discovery using SPARQL endpoints** — S. Yumusak, **R. E. Aras**, E. Uysal, E. Dogdu, H. Kodaz, K. Oztoprak — IEEE International Conference on Big Data · 2017
+- [Google Scholar profile](https://scholar.google.com/citations?hl=tr&user=3Cp2Dc4AAAAJ): all publications and citations.
 
 ## Education
 
-**KTO Karatay University** — Computer Engineering (Bachelor's Degree) · 2015 – 2020
+- **KTO Karatay University** — Computer Engineering (Bachelor's Degree) · 2015 – 2020
 
 ## Skills
 
@@ -72,5 +43,6 @@ TypeScript, JavaScript, Python, Go, Rust, Swift, C / FFI, React, Cloudflare Work
 
 Feel free to reach out for projects and collaborations.
 
-- github.com/remrearas: https://github.com/remrearas
-- r.emrearas@proton.me: mailto:r.emrearas@proton.me
+- [github.com/remrearas](https://github.com/remrearas)
+- [github.com/ARAS-Workspace](https://github.com/ARAS-Workspace)
+- [emre@aras.tc](mailto:emre@aras.tc)

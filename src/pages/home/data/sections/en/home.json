@@ -5,7 +5,7 @@
     "summary": "I build privacy-focused network systems and AI-assisted tooling. I work at ARTEK and ship open-source projects in my spare time.",
     "links": [
       { "label": "GitHub", "href": "https://github.com/remrearas", "icon": "github", "external": true },
-      { "label": "Email", "href": "mailto:r.emrearas@proton.me", "icon": "email" }
+      { "label": "Email", "href": "mailto:emre@aras.tc", "icon": "email" }
     ]
   },
   "projects": {
@@ -14,29 +14,29 @@
       {
         "name": "Phantom-WG",
         "description": "Phantom-WG is a modular tool for setting up and managing WireGuard VPN infrastructure on your own server. Beyond basic VPN management, it provides censorship-resistant connections, multi-layer encryption, and advanced privacy scenarios.",
-        "href": "https://www.phantom.tc",
+        "href": "https://github.com/ARAS-Workspace/phantom-wg",
         "tags": ["WireGuard", "VPN", "Censorship Resistance", "Privacy"],
         "external": true
       },
       {
         "name": "ARTEK Homepage",
         "description": "ARTEK Homepage is a modern, multilingual corporate website built with React and the Carbon Design System.",
-        "href": "https://www.artek.tc",
-        "tags": ["Company", "Technology"],
+        "href": "https://github.com/ARAS-Workspace/artek-homepage",
+        "tags": ["React", "Carbon Design"],
         "external": true
       },
       {
         "name": "Claude-KVM",
         "description": "Claude KVM is an MCP tool that controls remote desktop environments over VNC. It consists of a thin JS proxy layer (MCP server) and a platform-native Swift VNC daemon running on your macOS system.",
-        "href": "https://github.com/remrearas/claude-kvm",
-        "tags": ["MCP", "VNC", "Automation"],
+        "href": "https://github.com/ARAS-Workspace/claude-kvm",
+        "tags": ["MCP", "VNC", "AI Automation", "Swift"],
         "external": true
       },
       {
         "name": "EU AI Act RAG",
         "description": "A Full-Featured RAG Pipeline Example Based on Regulation (EU) 2024/1689 — The European AI Act",
-        "href": "https://github.com/remrearas/eu-ai-act-rag",
-        "tags": ["RAG", "LLM", "EU AI Act"],
+        "href": "https://github.com/ARAS-Workspace/eu-ai-act-rag",
+        "tags": ["RAG", "LLM", "EU AI Act", "EUR-Lex", "SPARQL", "Semantic Web"],
         "external": true
       }
     ]
@@ -102,7 +102,8 @@
     "description": "Feel free to reach out for projects and collaborations.",
     "links": [
       { "label": "github.com/remrearas", "href": "https://github.com/remrearas", "icon": "github", "external": true },
-      { "label": "r.emrearas@proton.me", "href": "mailto:r.emrearas@proton.me", "icon": "email" }
+      { "label": "github.com/ARAS-Workspace", "href": "https://github.com/ARAS-Workspace", "icon": "github", "external": true },
+      { "label": "emre@aras.tc", "href": "mailto:emre@aras.tc", "icon": "email" }
     ]
   }
 }
