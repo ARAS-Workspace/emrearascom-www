@@ -126,7 +126,7 @@ const ArtekBilingualLogo: React.FC<ArtekBilingualLogoProps> = ({ className = '',
       </g>
 
       {showTurkish && (
-        <g id="slogan-tr" aria-label="Yenilik, Strateji, Sonuç.">
+        <g id="slogan-tr">
           <path
             className="logo-fill"
             d="M251.19,176.19v6.24h-3.28v-6.19l-6.95-11.5h3.51l5.18,8.61,5.23-8.61h3.23l-6.92,11.44Z"
@@ -217,7 +217,7 @@ const ArtekBilingualLogo: React.FC<ArtekBilingualLogoProps> = ({ className = '',
 
       {/* ========== SLOGAN - ENGLISH ========== */}
       {showEnglish && (
-        <g id="slogan-en" aria-label="Innovation, Strategy, Results.">
+        <g id="slogan-en">
           <path className="logo-fill" d="M243.56,164.75h3.28v17.68h-3.28v-17.68Z" />
           <path
             className="logo-fill"
