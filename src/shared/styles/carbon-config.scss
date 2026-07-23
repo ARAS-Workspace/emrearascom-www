@@ -23,8 +23,25 @@
 @forward '@carbon/styles/scss/layout';
 @forward '@carbon/styles/scss/zone';
 
-// Component styles (all Carbon React components)
-@use '@carbon/react';
+// Component styles — pull ONLY the components this project actually renders,
+// instead of the full Carbon set (`@use '@carbon/react'`), so the CSS bundle
+// stays small. Base tokens / themes / reset / grid / fonts still come from the
+// `@carbon/styles` forwards above. Add a line here when a new Carbon component
+// is introduced.
+// @use '@carbon/react';  // (was: every Carbon React component's styles)
+// KEEP these in Carbon's own (alphabetical) emission order. Some components share
+// classes — e.g. an href ClickableTile carries `.cds--link` AND `.cds--tile` — so
+// the cascade must resolve exactly as the full bundle does (link emitted before
+// tile → `.cds--tile { display: block }` wins). Reordering silently breaks layout.
+@use '@carbon/react/scss/components/button'; // Button — error pages
+@use '@carbon/react/scss/components/code-snippet'; // CodeSnippet — PGP key
+@use '@carbon/react/scss/components/copy-button'; // CodeSnippet copy button
+@use '@carbon/react/scss/components/link'; // Link — intro / contact
+@use '@carbon/react/scss/components/loading'; // Loading — LoadingSpinner
+@use '@carbon/react/scss/components/modal'; // Modal — PGP key
+@use '@carbon/react/scss/components/tag'; // Tag — project tags / skills
+@use '@carbon/react/scss/components/tile'; // ClickableTile — projects
+@use '@carbon/react/scss/components/ui-shell'; // Header / SideNav / Content
 
 // App root — sticky footer via flexbox
 .app {
