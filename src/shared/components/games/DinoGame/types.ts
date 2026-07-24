@@ -36,5 +36,3 @@ export interface GameMessages {
   restartMessage: string;
   score: string;
 }
-
-export type ThemeMode = 'light' | 'dark';

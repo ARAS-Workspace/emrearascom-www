@@ -1,0 +1,60 @@
+@use '@carbon/react/scss/spacing' as spacing;
+@use '@carbon/react/scss/type' as type;
+
+.blog-post {
+  padding-block: spacing.$spacing-07 spacing.$spacing-10;
+}
+
+.blog-post__head {
+  margin-bottom: spacing.$spacing-06;
+}
+
+// Back link above the title. Pull it left by the ghost button's inline padding
+// so its label sits flush with the title. Carbon's renderIcon places the arrow
+// after the label; a back affordance reads better with the arrow leading, so
+// flip the row and reset the icon's inline margin, using gap for the spacing.
+.blog-post__back {
+  margin-left: calc(-1 * #{spacing.$spacing-05});
+  margin-bottom: spacing.$spacing-05;
+  flex-direction: row-reverse;
+  gap: spacing.$spacing-03;
+
+  .cds--btn__icon {
+    margin: 0;
+  }
+}
+
+.blog-post__title {
+  @include type.type-style('heading-04');
+  color: var(--cds-text-primary);
+  margin-bottom: spacing.$spacing-05;
+}
+
+.blog-post__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.$spacing-05;
+  margin-bottom: spacing.$spacing-05;
+}
+
+.blog-post__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.$spacing-02;
+  @include type.type-style('label-01');
+  color: var(--cds-text-secondary);
+
+  svg {
+    fill: var(--cds-icon-secondary);
+  }
+}
+
+.blog-post__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.$spacing-03;
+}
+
+.blog-post__body {
+  margin-top: spacing.$spacing-06;
+}

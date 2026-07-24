@@ -40,6 +40,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify llms.txt is up to date
+        # The per-page llms/*.txt files are committed so the build never depends
+        # on the generator being installed. This step regenerates them and fails
+        # if the result differs — i.e. if MDX changed without regenerating.
+        # The hand-written CV text is untouched (home has no MDX source).
+        run: |
+          npm --prefix tools/agentic-data-builder ci
+          node scripts/generate-llms.js
+          if ! git diff --quiet -- ':(glob)src/pages/**/llms/*.txt'; then
+            echo "::error::llms.txt is out of date — run 'npm run generate-llms' and commit the result."
+            git diff --stat -- ':(glob)src/pages/**/llms/*.txt'
+            exit 1
+          fi
+
       - name: Generate development certificate
         run: node scripts/generate_development_certificate.js
 
@@ -71,4 +85,4 @@ jobs:
         if: always()
         run: |
           rm -f .env.cf
-          rm -rf certs dist .wrangler node_modules
+          rm -rf certs dist .wrangler node_modules tools/agentic-data-builder/node_modules

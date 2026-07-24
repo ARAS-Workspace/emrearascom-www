@@ -1,0 +1,13 @@
+@use '@carbon/react/scss/spacing' as spacing;
+
+// Shown only for a slug that has no content directory — a stale or hand-typed
+// URL, since every real post is prerendered from disk. It borrows the error
+// pages' inner styles (error-page/styles/common.scss) but stays inside the
+// blog layout, so the container centres its content without the 404's full
+// viewport height.
+.blog-post-missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: spacing.$spacing-09 spacing.$spacing-10;
+}

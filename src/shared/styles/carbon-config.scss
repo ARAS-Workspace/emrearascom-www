@@ -29,18 +29,25 @@
 // `@carbon/styles` forwards above. Add a line here when a new Carbon component
 // is introduced.
 // @use '@carbon/react';  // (was: every Carbon React component's styles)
-// KEEP these in Carbon's own (alphabetical) emission order. Some components share
-// classes — e.g. an href ClickableTile carries `.cds--link` AND `.cds--tile` — so
-// the cascade must resolve exactly as the full bundle does (link emitted before
-// tile → `.cds--tile { display: block }` wins). Reordering silently breaks layout.
-@use '@carbon/react/scss/components/button'; // Button — error pages
-@use '@carbon/react/scss/components/code-snippet'; // CodeSnippet — PGP key
+// KEEP these in Carbon's own emission order — the authority is
+// `@carbon/styles/scss/components/_index.scss`, which is *nearly* but not
+// exactly alphabetical (`menu-button` precedes `menu`, `toggletip` precedes
+// `toggle`). Some components share classes — e.g. an href ClickableTile
+// carries `.cds--link` AND `.cds--tile` — so the cascade must resolve exactly
+// as the full bundle does (link emitted before tile → `.cds--tile { display:
+// block }` wins). Reordering silently breaks layout.
+@use '@carbon/react/scss/components/button'; // Button — error pages / blog pager
+@use '@carbon/react/scss/components/code-snippet'; // CodeSnippet — PGP key / MDX code blocks
 @use '@carbon/react/scss/components/copy-button'; // CodeSnippet copy button
-@use '@carbon/react/scss/components/link'; // Link — intro / contact
+@use '@carbon/react/scss/components/link'; // Link — intro / contact / blog
 @use '@carbon/react/scss/components/loading'; // Loading — LoadingSpinner
-@use '@carbon/react/scss/components/modal'; // Modal — PGP key
-@use '@carbon/react/scss/components/tag'; // Tag — project tags / skills
+@use '@carbon/react/scss/components/modal'; // Modal — PGP key / Mermaid fullscreen
+@use '@carbon/react/scss/components/notification'; // InlineNotification — Mermaid errors
+@use '@carbon/react/scss/components/skeleton-styles'; // SkeletonPlaceholder — CodeHighlight
+@use '@carbon/react/scss/components/tabs'; // Tabs — ContentTabs in MDX
+@use '@carbon/react/scss/components/tag'; // Tag — project tags / skills / post tags
 @use '@carbon/react/scss/components/tile'; // ClickableTile — projects
+@use '@carbon/react/scss/components/tooltip'; // IconButton tooltips — Mermaid controls
 @use '@carbon/react/scss/components/ui-shell'; // Header / SideNav / Content
 
 // App root — sticky footer via flexbox

@@ -52,6 +52,7 @@ const BlogLayout: React.FC = () => {
 
   const navItems = [
     { label: t.nav.home, href: '/' },
+    { label: t.nav.blog, href: '/blog' },
   ];
 
   // Normalize trailing slash for consistent comparison.

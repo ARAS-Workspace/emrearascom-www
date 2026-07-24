@@ -1,0 +1,76 @@
+@use '@carbon/react/scss/spacing' as spacing;
+@use '@carbon/react/scss/type' as type;
+
+.post-card {
+  border: 1px solid var(--cds-border-subtle);
+  background: var(--cds-layer-01);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    border-color: var(--cds-border-strong);
+    background: var(--cds-layer-hover-01);
+  }
+}
+
+.post-card__link {
+  display: block;
+  padding: spacing.$spacing-06;
+  text-decoration: none;
+  color: inherit;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+.post-card__date {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.$spacing-02;
+  @include type.type-style('label-01');
+  color: var(--cds-text-secondary);
+  margin-bottom: spacing.$spacing-03;
+
+  svg {
+    fill: var(--cds-icon-secondary);
+  }
+}
+
+.post-card__title {
+  @include type.type-style('heading-03');
+  color: var(--cds-text-primary);
+  margin-bottom: spacing.$spacing-03;
+}
+
+.post-card__excerpt {
+  @include type.type-style('body-01');
+  color: var(--cds-text-secondary);
+  margin-bottom: spacing.$spacing-05;
+}
+
+.post-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: spacing.$spacing-03;
+  margin-bottom: spacing.$spacing-05;
+}
+
+.post-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: spacing.$spacing-02;
+  @include type.type-style('label-01');
+  color: var(--cds-link-primary);
+
+  svg {
+    fill: currentColor;
+    transition: transform 0.15s ease;
+  }
+}
+
+.post-card:hover .post-card__cta svg {
+  transform: translateX(4px);
+}

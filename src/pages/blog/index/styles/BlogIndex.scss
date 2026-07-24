@@ -1,0 +1,51 @@
+@use '@carbon/react/scss/spacing' as spacing;
+@use '@carbon/react/scss/type' as type;
+
+.blog-index {
+  padding-block: spacing.$spacing-07 spacing.$spacing-10;
+}
+
+.blog-index__header {
+  margin-bottom: spacing.$spacing-07;
+}
+
+.blog-index__title {
+  @include type.type-style('heading-04');
+  color: var(--cds-text-primary);
+  margin-bottom: spacing.$spacing-03;
+}
+
+.blog-index__subtitle {
+  @include type.type-style('body-01');
+  color: var(--cds-text-secondary);
+}
+
+.blog-index__list {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.$spacing-06;
+}
+
+.blog-index__empty {
+  @include type.type-style('body-01');
+  color: var(--cds-text-secondary);
+  padding-block: spacing.$spacing-07;
+}
+
+// ── Pager ──────────────────────────────────────────────────────────
+// Only rendered once the corpus outgrows a single page.
+.blog-index__pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: spacing.$spacing-05;
+  margin-top: spacing.$spacing-07;
+  padding-top: spacing.$spacing-05;
+  border-top: 1px solid var(--cds-border-subtle);
+}
+
+.blog-index__pager-status {
+  @include type.type-style('label-01');
+  color: var(--cds-text-secondary);
+  white-space: nowrap;
+}

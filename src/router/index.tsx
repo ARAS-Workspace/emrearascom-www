@@ -8,6 +8,13 @@ import LoadingSpinner from '@shared/components/ui/LoadingSpinner';
 // ── Home (CV) ─────────────────────────────────────────────────────
 const HomePage = lazy(() => import('@pages/home'));
 
+// ── Blog ──────────────────────────────────────────────────────────
+// Two entries, however many posts. `/blog/:slug` is served by one generic
+// renderer that resolves the slug against the content registry, so publishing
+// a post never touches this file — see shared/components/blog/posts.ts.
+const BlogIndexPage = lazy(() => import('@pages/blog/index'));
+const BlogPostPage = lazy(() => import('@pages/blog/post'));
+
 // ── Router ────────────────────────────────────────────────────────
 const router = createBrowserRouter([
   {
@@ -18,6 +25,14 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: 'blog',
+        element: <BlogIndexPage />,
+      },
+      {
+        path: 'blog/:slug',
+        element: <BlogPostPage />,
       },
     ],
   },

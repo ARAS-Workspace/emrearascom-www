@@ -1,3 +1,6 @@
+/* noinspection CssUnusedSymbol -- classes are applied in KaratayLogo.tsx via
+   className; the [data-locale] compound selectors resolve at runtime, which the
+   static CSS-usage check can't see. */
 // KTO Karatay wordmark, composed from a theme-driven SYMBOL + a locale-driven
 // TEXT. All four fragments are inlined; CSS reveals one symbol (by
 // data-carbon-theme) and one text (by data-locale). Consumers set --karatay-h

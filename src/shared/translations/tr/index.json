@@ -13,7 +13,8 @@
     "switchTo": "English"
   },
   "nav": {
-    "home": "Ana Sayfa"
+    "home": "Ana Sayfa",
+    "blog": "Blog"
   },
   "pgp": {
     "label": "PGP",

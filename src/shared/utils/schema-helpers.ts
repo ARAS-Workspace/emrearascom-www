@@ -12,6 +12,7 @@
 
 import { getSiteConfig, type SiteConfig } from '@shared/config/seoConfig';
 import type { Locale } from '@shared/translations';
+import { toISO } from './date-helpers';
 
 // ============================================================================
 // Helpers
@@ -22,6 +23,71 @@ const inLanguageTag = (locale: Locale): string => (locale === 'tr' ? 'tr-TR' : '
 
 /** Stable `@id` of the single Person node this whole site revolves around. */
 const personId = (siteConfig: SiteConfig): string => `${siteConfig.url}/#person`;
+
+/** Stable `@id` of the Blog node — posts point back at it via `isPartOf`. */
+const blogId = (siteConfig: SiteConfig): string => `${siteConfig.url}/blog#blog`;
+
+/** Absolute site URL for a root-relative path. */
+const absoluteUrl = (siteConfig: SiteConfig, path: string): string =>
+  `${siteConfig.url}${path.startsWith('/') ? path : `/${path}`}`;
+
+/**
+ * Reference to the canonical Person node, used for author and publisher.
+ *
+ * Carries `@type`, `name` and `url` alongside the `@id` rather than the `@id`
+ * alone. The full Person node lives only on the home page (ProfilePage's
+ * mainEntity), so on a standalone post a bare `{ @id }` can't be resolved — a
+ * validator then reports an untyped "Thing" with no name. Repeating the type
+ * and name here keeps the reference self-describing while the shared `@id`
+ * still ties it to the one canonical Person.
+ */
+const personRef = (siteConfig: SiteConfig) => ({
+  '@type': 'Person',
+  '@id': personId(siteConfig),
+  name: siteConfig.author.name,
+  url: siteConfig.url,
+});
+
+// ============================================================================
+// Blog content types
+// ----------------------------------------------------------------------------
+// `BlogPostFile` is exactly what a post's meta.json holds. `slug` is NOT part
+// of it — it is derived from the containing directory name, so the folder is
+// the single source of truth and the two can never disagree. The content
+// registry injects it, producing `BlogPostMeta`.
+// ============================================================================
+
+export interface BlogPostSeo {
+  title: string;
+  description: string;
+  /** Per-locale labels ('ağ' vs 'networking'). Data only — rendered as chips
+   *  and emitted as schema `keywords`; deliberately not a navigable taxonomy. */
+  tags: string[];
+}
+
+export interface BlogPostFile {
+  /** Istanbul wall-clock stamps, 'DD/MM/YYYY HH:mm'. Shared across locales. */
+  kv: { createdAt: string; updatedAt: string };
+  /** Byline. Optional — omit it and the post is attributed to the site owner.
+   *  Shared across locales. */
+  author?: string;
+  seo: Record<Locale, BlogPostSeo>;
+}
+
+export interface BlogPostMeta extends BlogPostFile {
+  /** Derived from the post's directory name. */
+  slug: string;
+}
+
+/**
+ * Root-relative cover URL for a post. Every post gets a generated card at a
+ * fixed, unhashed path under `public/assets/blog/` (a build artifact — see
+ * scripts/generate-covers.js), so there is always an image and nothing to
+ * configure per post. Both the SEO meta tags and the BlogPosting schema resolve
+ * the cover through here so they never diverge.
+ */
+export const coverPath = (meta: BlogPostMeta, locale: Locale): string =>
+  `/assets/blog/${meta.slug}/cover.${locale}.png`;
 
 // ============================================================================
 // Identity constants
@@ -115,5 +181,65 @@ export const createProfilePageSchema = (locale: Locale = 'tr') => {
     inLanguage: inLanguageTag(locale),
     isPartOf: createWebSiteRef(locale),
     mainEntity: buildPerson(locale),
+  };
+};
+
+/**
+ * Blog schema for the post listing page.
+ *
+ * The visible name/description are passed in rather than duplicated here —
+ * `blog-i18n.ts` stays the single source of that copy.
+ *
+ * @param locale - Language code ('tr' or 'en')
+ * @param copy   - The listing page's own heading and subtitle
+ */
+export const createBlogSchema = (locale: Locale = 'tr', copy: { name: string; description: string }) => {
+  const siteConfig = getSiteConfig(locale);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    '@id': blogId(siteConfig),
+    url: absoluteUrl(siteConfig, '/blog'),
+    name: copy.name,
+    description: copy.description,
+    inLanguage: inLanguageTag(locale),
+    isPartOf: createWebSiteRef(locale),
+    author: personRef(siteConfig),
+    publisher: personRef(siteConfig),
+  };
+};
+
+/**
+ * BlogPosting schema for a single post. Tags ride along as `keywords` — the
+ * one place they carry weight, since they are not a navigable taxonomy.
+ *
+ * @param meta   - The post's metadata, slug included
+ * @param locale - Language code ('tr' or 'en')
+ */
+export const createBlogPostingSchema = (meta: BlogPostMeta, locale: Locale = 'tr') => {
+  const siteConfig = getSiteConfig(locale);
+  const seo = meta.seo[locale] ?? meta.seo.tr;
+  const url = absoluteUrl(siteConfig, `/blog/${meta.slug}`);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': `${url}#post`,
+    url,
+    mainEntityOfPage: url,
+    headline: seo.title,
+    description: seo.description,
+    inLanguage: inLanguageTag(locale),
+    datePublished: toISO(meta.kv.createdAt),
+    dateModified: toISO(meta.kv.updatedAt),
+    // A byline that names someone other than the site owner must not resolve to
+    // the owner's Person node, or the schema would credit the wrong author.
+    author:
+      meta.author && meta.author !== siteConfig.author.name
+        ? { '@type': 'Person', name: meta.author }
+        : personRef(siteConfig),
+    publisher: personRef(siteConfig),
+    isPartOf: { '@id': blogId(siteConfig) },
+    ...(seo.tags?.length ? { keywords: seo.tags } : {}),
+    image: absoluteUrl(siteConfig, coverPath(meta, locale)),
   };
 };
