@@ -22,7 +22,7 @@ const REVALIDATE = 'no-cache';
  * @returns {string}
  */
 function assetCacheControl(pathname) {
-  return /^\/assets\/.+\.(js|css)$/.test(pathname) ? IMMUTABLE : REVALIDATE;
+  return /^\/assets\/.+\.(js|css)$/i.test(pathname) ? IMMUTABLE : REVALIDATE;
 }
 
 /**
@@ -97,19 +97,22 @@ export default {
       });
     }
 
-    // Static assets — pass through, tagged with the right cache lifetime.
+    // Build output at /assets/* — served with the right cache lifetime, but ONLY
+    // when it genuinely exists. A path the current deploy no longer has is answered
+    // by Pages with the SPA shell (200 HTML, see tryServeMarkdown's note) or a 404,
+    // never the asset. The old code stamped that miss with the asset's Cache-Control;
+    // for a hashed `.js`/`.css` that pinned an HTML body under the module URL as
+    // immutable for a year, so the loader MIME-rejected it on every later load (the
+    // white "Hata" page). Nothing under /assets/ should ever fall back to the shell,
+    // so answer ANY miss there as a real, uncacheable 404. A 200/206/304 for a real
+    // file is a hit and passes through untouched — this must not swallow a revalidation
+    // 304 for an image/font, nor a range 206.
     if (pathname.includes('.') && !pathname.endsWith('.html')) {
       const res = await env.ASSETS.fetch(request);
 
-      // A hashed chunk the current deploy no longer has is answered by Pages with
-      // the SPA shell (200 HTML — see tryServeMarkdown's note), not a 404. Tagging
-      // THAT as immutable pins an HTML body under a `.js`/`.css` URL for a year, so
-      // the module loader MIME-rejects it on every later load (the white "Hata"
-      // page) long after the real file is back. Only cache a genuine asset hit;
-      // answer a shell/miss as a real, uncacheable 404 so nothing poisonous sticks.
-      const isHashedAsset = /^\/assets\/.+\.(js|css)$/.test(pathname);
+      const isBuildAsset = pathname.startsWith('/assets/');
       const isHtmlShell = /text\/html/i.test(res.headers.get('content-type') || '');
-      if (isHashedAsset && (res.status !== 200 || isHtmlShell)) {
+      if (isBuildAsset && (res.status >= 400 || isHtmlShell)) {
         return new Response('Not Found\n', {
           status: 404,
           headers: {
