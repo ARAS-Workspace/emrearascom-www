@@ -100,6 +100,25 @@ export default {
     // Static assets — pass through, tagged with the right cache lifetime.
     if (pathname.includes('.') && !pathname.endsWith('.html')) {
       const res = await env.ASSETS.fetch(request);
+
+      // A hashed chunk the current deploy no longer has is answered by Pages with
+      // the SPA shell (200 HTML — see tryServeMarkdown's note), not a 404. Tagging
+      // THAT as immutable pins an HTML body under a `.js`/`.css` URL for a year, so
+      // the module loader MIME-rejects it on every later load (the white "Hata"
+      // page) long after the real file is back. Only cache a genuine asset hit;
+      // answer a shell/miss as a real, uncacheable 404 so nothing poisonous sticks.
+      const isHashedAsset = /^\/assets\/.+\.(js|css)$/.test(pathname);
+      const isHtmlShell = /text\/html/i.test(res.headers.get('content-type') || '');
+      if (isHashedAsset && (res.status !== 200 || isHtmlShell)) {
+        return new Response('Not Found\n', {
+          status: 404,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'no-store',
+          },
+        });
+      }
+
       const headers = new Headers(res.headers);
       headers.set('Cache-Control', assetCacheControl(pathname));
       return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
