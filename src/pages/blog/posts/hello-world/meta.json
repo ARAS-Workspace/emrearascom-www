@@ -1,0 +1,19 @@
+{
+  "kv": {
+    "createdAt": "24/07/2026 16:40",
+    "updatedAt": "24/07/2026 16:40"
+  },
+  "author": "Rıza Emre ARAS",
+  "seo": {
+    "tr": {
+      "title": "Merhaba Dünya",
+      "description": "İlk yazı ve dosya tabanlı yayın sisteminin tanıtımı",
+      "tags": ["Blog", "Açık Kaynak", "Mimari", "Merhaba Dünya!"]
+    },
+    "en": {
+      "title": "Hello World",
+      "description": "The first post and an introduction to the file-based publishing system",
+      "tags": ["Blog", "Open Source", "Architecture", "Hello World!"]
+    }
+  }
+}

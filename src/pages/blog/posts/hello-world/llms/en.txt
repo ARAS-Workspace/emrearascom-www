@@ -1,0 +1,178 @@
+> **emrearas.com — machine-readable page content.**
+>
+> **EN:** Auto-generated from this page's MDX source. Interactive components
+> (diagrams, charts, surveys, data tables) are replaced by their source
+> data or a short directive — read those as data pointers, not missing content.
+>
+> **TR:** Bu sayfanın MDX kaynağından otomatik üretildi. İnteraktif bileşenler
+> (diyagram, grafik, anket, veri tablosu) kaynak verisiyle veya kısa bir
+> direktifle değiştirildi — eksik içerik değil, veri işaretçisi olarak okuyun.
+
+**path:** /blog/hello-world · **locale:** en · **tr:** https://www.emrearas.com/blog/hello-world/llms.txt?locale=tr
+
+# Hello World
+
+First of all, thank you for your interest in this post and in my blog.
+
+This will be a space where I bring together my personal technical writing. I plan to share the projects I work on, my notes on networking and privacy technologies, AI-assisted tools, and the observations I gather along the way. My aim is to collect this scattered knowledge in an orderly and lasting form. The fact that both the content and the system that produces it are open source from end to end is part of this approach.
+
+In this first post, I will walk you through how the blog system I built works.
+
+## How Does This Blog Work?
+
+The architecture of the blog system rests on a file-based publishing model. Content does not live in a database; it sits inside the repository as plain files. Each post occupies its own directory under `src/pages/blog/posts/<slug>/`. The system consists of three layers:
+
+- **Build Pipeline** ([route-sources.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/lib/route-sources.js)). Collects content from disk and prepares it for publishing.
+- **Prerender Layer** ([prerender.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/utils/prerender-utility/prerender.js)). Turns each page into static HTML.
+- **Cloudflare Worker** ([\_worker.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/utils/prerender-utility/_worker.js)). Serves the resulting output at the edge, on demand.
+
+### System Architecture and Design
+
+The router is the single source of truth and holds only two lines for the blog. One is the `/blog` list page, the other is the `/blog/:slug` post resolver. Concrete post routes are not written into the router by hand. During the build, [route-sources.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/lib/route-sources.js) scans the disk and expands every directory under `posts/` that contains a `meta.json` into a route. Publishing a post is therefore a matter of adding its directory. The same route map is shared by three separate consumers:
+
+- **Route List** ([build\_routes.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/build_routes.js)). Produces the source of the concrete addresses to be processed during prerender.
+- **llms.txt Generation** ([generate-llms.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/generate-llms.js)). Derives the machine-readable text version of each post.
+- **llms.txt Concatenation** ([build-llms.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/build-llms.js)). Merges the text versions of all pages into a single combined document.
+
+The prerender layer walks every route in a real browser with **Playwright** and produces static HTML. Output files are split per language and theme. There is no runtime dependency.
+
+The static output is served at the edge by [\_worker.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/utils/prerender-utility/_worker.js). The **Cloudflare Worker** selects the correct HTML file based on the request's language and theme. It routes a `/blog/<slug>/llms.txt` request to the machine-readable text of the same post. The worker also sets the cache policy. Hashed build output, that is `/assets/*.js` and `/assets/*.css`, is permanent and cached for a long time. Document files are revalidated on every request, because they are the map that points to the current hashes.
+
+### Example Scenario
+
+The path a post follows from start to publication is clear. First, the scaffold is generated.
+
+```bash
+npm run new-post hello-world
+```
+
+This command opens the `src/pages/blog/posts/hello-world/` directory through [post-tool.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/post-tool.js). The directory contains `meta.json`, `index.mdx`, and `index.en.mdx`. Next, the metadata and bodies are filled in. In `meta.json`, the title, description, and tags live under `seo.tr` and `seo.en`. The body does not use `#`. Headings start at the `##` level, and the H1 value is produced from the `seo.title` field. The text is written as **MDX** in both languages.
+
+The post is previewed locally.
+
+```bash
+npm run dev
+# https://localhost:5173/blog/hello-world
+```
+
+Once the content is final, the machine-readable text is generated and the change is recorded.
+
+```bash
+npm run generate-llms
+git add src/pages/blog/posts/hello-world
+git commit -m "Blog Post: Merhaba Dünya / İlk yazı ve dosya tabanlı yayın sisteminin tanıtımı"
+git push
+```
+
+Everything up to the push runs entirely by hand. After the push, everything is automatic. Every push to the `main` branch triggers the [**GitHub Actions** deployment workflow](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/.github/workflows/deploy-emrearascom-www.yml). The workflow proceeds in three stages:
+
+1. **Verification.** It regenerates the llms files; if the result differs from the committed version, it stops the build.
+2. **Build.** With `npm run prod` it generates the cover images, compiles the project, extracts the routes, prerenders every page, and moves the llms files into the distribution directory.
+3. **Deployment.** **wrangler** sends the output to the **Cloudflare Pages** project and updates [www.emrearas.com](https://www.emrearas.com).
+
+The diagram below shows the deployment workflow triggered by a push to the `main` branch.
+
+```mermaid
+flowchart TD
+  push["git push (main)"] --> ci["GitHub Actions"]
+  ci --> install["npm ci"]
+  install --> drift{"Generated llms<br/>matches commit?"}
+  drift -->|No| stop["Build stops"]
+  drift -->|Yes| build["npm run prod"]
+  build --> deploy["wrangler pages deploy"]
+  deploy --> pages["Cloudflare Pages (www.emrearas.com)"]
+```
+
+### Content Management
+
+A post's entire state is gathered in its own directory. The metadata lives in the `meta.json` file. The creation and update dates, the author field, and the per-language SEO information are here. The text itself is written as **MDX** in both languages. Several outputs are derived automatically from these two sources.
+
+#### llms.txt Structure
+
+Alongside the HTML that people read, each post carries a text version that machines read. [generate-llms.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/generate-llms.js) passes the **MDX** source through the **agentic-data-builder** tool and produces the `llms/tr.txt` and `llms/en.txt` files. Since the title is not present in the body, the generator adds the `seo.title` value to the top of the file as an H1. These files are committed. During the build, [build-llms.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/build-llms.js) copies them into the distribution directory and merges all pages into a single file. The **Cloudflare Worker** returns this text to a request that carries the `Accept: text/markdown` header, or to a direct `llms.txt` request. This way the same address serves both people and machines.
+
+#### Cover Image
+
+Each post's **Open Graph** cover image is not prepared by hand. The [cover generator](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/generate-covers.js) produces a 1200x630 PNG from the title and description. This file is a build product and is linked to the `og:image` field. A new post's cover is created on its own during the prod build. This post's cover was produced the same way.
+
+> [Figure] interactive component — see the live page.
+
+#### SEO Layer
+
+Each post page produces canonical, hreflang, **Open Graph**, and **Twitter** tags per language. Alongside these, structured data is embedded as **JSON-LD**. The list page carries a Blog schema, and the post page carries a BlogPosting schema.
+
+List page (`/blog`):
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "@id": "https://www.emrearas.com/blog#blog",
+  "url": "https://www.emrearas.com/blog",
+  "name": "Blog",
+  "description": "My Personal Writing",
+  "inLanguage": "en-US",
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://www.emrearas.com/#website",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  },
+  "author": {
+    "@type": "Person",
+    "@id": "https://www.emrearas.com/#person",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  },
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://www.emrearas.com/#person",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  }
+}
+```
+
+Post page (`/blog/hello-world`):
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://www.emrearas.com/blog/hello-world#post",
+  "url": "https://www.emrearas.com/blog/hello-world",
+  "mainEntityOfPage": "https://www.emrearas.com/blog/hello-world",
+  "headline": "Hello World",
+  "description": "The first post and an introduction to the file-based publishing system",
+  "inLanguage": "en-US",
+  "datePublished": "2026-07-24T16:40:00+03:00",
+  "dateModified": "2026-07-24T16:40:00+03:00",
+  "author": {
+    "@type": "Person",
+    "@id": "https://www.emrearas.com/#person",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  },
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://www.emrearas.com/#person",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  },
+  "isPartOf": { "@id": "https://www.emrearas.com/blog#blog" },
+  "keywords": ["Blog", "Open Source", "Architecture", "Hello World!"],
+  "image": "https://www.emrearas.com/assets/blog/hello-world/cover.en.png"
+}
+```
+
+## License
+
+This site and its source code are provided under the GNU Affero General Public License version 3.0 or later (AGPL-3.0-or-later).
+
+## Open Source
+
+| Source                        | Address                                                                                        |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- |
+| Personal Account              | [github.com/remrearas](https://github.com/remrearas)                                           |
+| Organization (ARAS-Workspace) | [github.com/ARAS-Workspace](https://github.com/ARAS-Workspace)                                 |
+| emrearascom-www (This Site)   | [github.com/ARAS-Workspace/emrearascom-www](https://github.com/ARAS-Workspace/emrearascom-www) |

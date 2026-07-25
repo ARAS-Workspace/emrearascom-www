@@ -1,0 +1,173 @@
+import Figure from "@shared/components/content/Figure.tsx";
+import Mermaid from "@shared/components/visualization/Mermaid.tsx";
+
+Öncelikli olarak bu yazıya ve blog alanıma gösterdiğiniz ilgi için teşekkür ederim.
+
+Burası, kişisel teknik yazılarımı bir araya getirdiğim bir alan olacak. Üzerinde çalıştığım projeleri, ağ ve gizlilik teknolojilerine dair notlarımı, yapay zeka destekli araçları ve yol boyunca edindiğim gözlemleri burada paylaşmayı planlıyorum. Amacım, dağınık halde duran bu bilgiyi düzenli ve kalıcı bir biçimde bir araya getirmek. Hem içeriğin hem de onu üreten sistemin baştan sona açık kaynak olması da bu yaklaşımın bir parçası.
+
+İlk yazımda sizlere tasarladığım blog sisteminin nasıl çalıştığından bahsedeceğim.
+
+## Bu Blog Nasıl Çalışıyor?
+
+Blog sisteminin mimarisi, dosya tabanlı bir yayın sistemine dayanıyor. İçerik bir veritabanında değil, deponun içinde düz dosyalar olarak durur. Her yazı `src/pages/blog/posts/<slug>/` altında kendi dizinini işgal eder. Sistem üç katmandan oluşur:
+
+- **Derleme Hattı** ([route-sources.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/lib/route-sources.js)). İçeriği diskten toplar ve yayına hazırlar.
+- **Prerender Katmanı** ([prerender.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/utils/prerender-utility/prerender.js)). Her sayfayı statik HTML'e dönüştürür.
+- **Cloudflare Worker** ([_worker.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/utils/prerender-utility/_worker.js)). Elde edilen çıktıyı edge üzerinde, isteğe göre sunar.
+
+### Sistem Mimarisi ve Tasarımı
+
+Router tek yetkili kaynaktır ve blog için yalnızca iki satır tutar. Biri `/blog` liste sayfası, diğeri `/blog/:slug` yazı çözücüsüdür. Somut yazı rotaları router'a elle yazılmaz. Derleme sırasında [route-sources.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/lib/route-sources.js) diski tarar ve `posts/` altında `meta.json` içeren her dizini bir rotaya genişletir. Bu yüzden bir yazıyı yayına almak dizini eklemekten ibarettir. Aynı rota haritası üç ayrı tüketici tarafından paylaşılır:
+
+- **Rota Listesi** ([build_routes.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/build_routes.js)). Prerender aşamasında işlenecek somut adreslerin kaynağını oluşturur.
+- **llms.txt Üretimi** ([generate-llms.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/generate-llms.js)). Her yazının makine tarafından okunabilir metin sürümünü türetir.
+- **llms.txt Birleştirme** ([build-llms.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/build-llms.js)). Tüm sayfaların metin sürümlerini tek bir toplu belgede birleştirir.
+
+Prerender katmanı her rotayı **Playwright** ile gerçek bir tarayıcıda gezer ve statik HTML üretir. Çıktı dosyaları dil ve tema başına ayrılır. Runtime bağımlılığı yoktur.
+
+Statik çıktıyı edge üzerinde [_worker.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/utils/prerender-utility/_worker.js) sunar. **Cloudflare Worker**, isteğin diline ve temasına göre doğru HTML dosyasını seçer. `/blog/<slug>/llms.txt` isteğini aynı yazının makine-okunur metin haline yönlendirir. Önbellek politikasını da worker belirler. Hash'li derleme çıktısı, yani `/assets/*.js` ve `/assets/*.css`, kalıcıdır ve uzun süre önbelleklenir. Belge dosyaları her istekte yeniden doğrulanır, çünkü onlar geçerli hash'lere işaret eden haritadır.
+
+### Örnek Senaryo
+
+Bir yazının başından yayına izlediği yol nettir. Önce iskelet üretilir.
+
+```bash
+npm run new-post hello-world
+```
+
+Bu komut [post-tool.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/post-tool.js) üzerinden `src/pages/blog/posts/hello-world/` dizinini açar. Dizin `meta.json`, `index.mdx` ve `index.en.mdx` dosyalarını içerir. Ardından üst veri ve gövdeler doldurulur. `meta.json` içinde başlık, açıklama ve etiketler `seo.tr` ile `seo.en` altında yer alır. Gövdede `#` kullanılmaz. Başlıklar `##` seviyesinden başlar ve H1 değeri `seo.title` alanından üretilir. Metin iki dilde **MDX** olarak yazılır.
+
+Yazı yerelde önizlenir.
+
+```bash
+npm run dev
+# https://localhost:5173/blog/hello-world
+```
+
+İçerik son halini alınca makine-okunur metin üretilir ve değişiklik kayda geçer.
+
+```bash
+npm run generate-llms
+git add src/pages/blog/posts/hello-world
+git commit -m "Blog Post: Merhaba Dünya / İlk yazı ve dosya tabanlı yayın sisteminin tanıtımı"
+git push
+```
+
+Push anına kadar olan bölüm tümüyle elle yürür. Push sonrası tümüyle otomatiktir. `main` dalına gelen her push, [**GitHub Actions** Dağıtım İş Akışını](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/.github/workflows/deploy-emrearascom-www.yml) tetikler. İş akışı üç aşamada ilerler:
+
+1. **Doğrulama.** llms dosyalarını yeniden üretir; sonuç commit'lenmiş sürümden farklıysa derlemeyi durdurur.
+2. **Derleme.** `npm run prod` ile kapak görsellerini üretir, projeyi derler, rotaları çıkarır, her sayfayı prerender eder ve llms dosyalarını dağıtım dizinine taşır.
+3. **Dağıtım.** **wrangler**, çıktıyı **Cloudflare Pages** projesine göndererek [www.emrearas.com](https://www.emrearas.com)'u günceller.
+
+Aşağıdaki diyagram, `main` dalına gelen push'un tetiklediği Dağıtım İş Akışını gösterir.
+
+<Mermaid
+  chart={`flowchart TD
+    push["git push (main)"] --> ci["GitHub Actions"]
+    ci --> install["npm ci"]
+    install --> drift{"Üretilen llms<br/>commit ile aynı mı?"}
+    drift -->|Hayır| stop["Derleme durur"]
+    drift -->|Evet| build["npm run prod"]
+    build --> deploy["wrangler pages deploy"]
+    deploy --> pages["Cloudflare Pages (www.emrearas.com)"]`}
+/>
+
+### İçerik Yönetimi
+
+Bir yazının tüm durumu kendi dizininde toplanır. Üst veri `meta.json` dosyasında durur. Oluşturma ve güncelleme tarihleri, yazar alanı ve dil başına SEO bilgileri buradadır. Metnin kendisi iki dilde **MDX** olarak yazılır. Bu iki kaynaktan birkaç çıktı otomatik türetilir.
+
+#### llms.txt Yapısı
+
+Her yazı, insanların okuduğu HTML'in yanında makinelerin okuduğu bir metin sürümü taşır. [generate-llms.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/generate-llms.js) **MDX** kaynağını **agentic-data-builder** aracından geçirir ve `llms/tr.txt` ile `llms/en.txt` dosyalarını üretir. Başlık gövdede bulunmadığından, üretici `seo.title` değerini dosyanın başına H1 olarak ekler. Bu dosyalar commit edilir. Derleme sırasında [build-llms.js](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/build-llms.js) onları dağıtım dizinine kopyalar ve tüm sayfaları tek bir dosyada birleştirir. **Cloudflare Worker**, `Accept: text/markdown` başlığı taşıyan isteğe ya da doğrudan `llms.txt` isteğine bu metni döner. Böylece aynı adres hem insana hem makineye hizmet eder.
+
+#### Kapak Görseli
+
+Her yazının **Open Graph** kapak görseli elle hazırlanmaz. [Kapak Üreticisi](https://github.com/ARAS-Workspace/emrearascom-www/blob/34aae0ee5bcb1f4b9eb2ec74d7831429e127836d/scripts/generate-covers.js) başlık ve açıklamadan 1200x630 boyutunda bir PNG üretir. Bu dosya build ürünüdür ve `og:image` alanına bağlanır. Yeni bir yazının kapağı, prod derlemesi sırasında kendiliğinden oluşur. Bu yazının kapağı da aynı yolla üretildi.
+
+<Figure
+  src="/assets/blog/hello-world/cover.tr.png"
+  alt="Merhaba Dünya yazısının otomatik üretilen kapak görseli"
+  caption="Bu yazının otomatik üretilen kapağı"
+  width={1200}
+  height={630}
+/>
+
+#### SEO Katmanı
+
+Her yazı sayfası dile göre canonical, hreflang, **Open Graph** ve **Twitter** etiketleri üretir. Bunların yanında yapısal veri olarak **JSON-LD** gömülür. Liste sayfası bir Blog şeması, yazı sayfası bir BlogPosting şeması taşır.
+
+Liste sayfası (`/blog`):
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "@id": "https://www.emrearas.com/blog#blog",
+  "url": "https://www.emrearas.com/blog",
+  "name": "Blog",
+  "description": "Kişisel Yazılarım",
+  "inLanguage": "tr-TR",
+  "isPartOf": {
+    "@type": "WebSite",
+    "@id": "https://www.emrearas.com/#website",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  },
+  "author": {
+    "@type": "Person",
+    "@id": "https://www.emrearas.com/#person",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  },
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://www.emrearas.com/#person",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  }
+}
+```
+
+Yazı sayfası (`/blog/hello-world`):
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://www.emrearas.com/blog/hello-world#post",
+  "url": "https://www.emrearas.com/blog/hello-world",
+  "mainEntityOfPage": "https://www.emrearas.com/blog/hello-world",
+  "headline": "Merhaba Dünya",
+  "description": "İlk yazı ve dosya tabanlı yayın sisteminin tanıtımı",
+  "inLanguage": "tr-TR",
+  "datePublished": "2026-07-24T16:40:00+03:00",
+  "dateModified": "2026-07-24T16:40:00+03:00",
+  "author": {
+    "@type": "Person",
+    "@id": "https://www.emrearas.com/#person",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  },
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://www.emrearas.com/#person",
+    "name": "Rıza Emre ARAS",
+    "url": "https://www.emrearas.com"
+  },
+  "isPartOf": { "@id": "https://www.emrearas.com/blog#blog" },
+  "keywords": ["Blog", "Açık Kaynak", "Mimari", "Merhaba Dünya!"],
+  "image": "https://www.emrearas.com/assets/blog/hello-world/cover.tr.png"
+}
+```
+
+## Lisans
+
+Bu site ve kaynak kodu, GNU Affero General Public License sürüm 3.0 veya sonrası (AGPL-3.0-or-later) kapsamında sunulmaktadır.
+
+## Açık Kaynak
+
+| Kaynak                        | Adres                                                                                          |
+|-------------------------------|------------------------------------------------------------------------------------------------|
+| Kişisel Hesap                 | [github.com/remrearas](https://github.com/remrearas)                                           |
+| Organizasyon (ARAS-Workspace) | [github.com/ARAS-Workspace](https://github.com/ARAS-Workspace)                                 |
+| emrearascom-www (Bu Site)     | [github.com/ARAS-Workspace/emrearascom-www](https://github.com/ARAS-Workspace/emrearascom-www) |
