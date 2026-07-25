@@ -1,8 +1,10 @@
-@use '@carbon/react/scss/components/button';
-@use '@carbon/react/scss/components/modal';
-@use '@carbon/react/scss/components/notification';
-@use '@carbon/react/scss/components/loading';
-
+// Carbon component styles (button, modal, notification, loading) are loaded once
+// globally in carbon-config.scss. Re-@use-ing them here would recompile those
+// styles into the lazy blog chunk and re-inject them at a later cascade position
+// when a post loads, overriding the app's modal customizations (e.g. the PGP
+// modal shrank on the home page after visiting a post). The Carbon elements this
+// component renders are styled by the global config; only Sass utilities are
+// pulled in below.
 @use '@carbon/react/scss/breakpoint' as bp;
 @use '@carbon/react/scss/theme' as theme;
 @use '@carbon/react/scss/spacing' as spacing;
@@ -417,7 +419,10 @@
   }
 }
 
-.#{config.$prefix}--modal.is-visible {
+// Scoped to this component's own fullscreen modal; a bare `.cds--modal.is-visible`
+// would darken every modal's overlay (e.g. the home page PGP modal) once a post
+// loads this stylesheet.
+.mermaid-fullscreen-modal.is-visible {
   background-color: rgba(0, 0, 0, 0.95);
 }
 

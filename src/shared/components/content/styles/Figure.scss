@@ -1,0 +1,41 @@
+@use '@carbon/react/scss/spacing' as spacing;
+@use '@carbon/react/scss/type' as type;
+
+// Bare markdown images (![]()) stay within the content column.
+.mdx-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.mdx-figure {
+  margin: spacing.$spacing-07 0;
+
+  &__frame {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--cds-border-subtle-00);
+    border-radius: 4px;
+  }
+
+  // Two classes outweigh `.mdx-content img`, so the framed image fills its box.
+  &__frame &__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 240ms ease;
+
+    &.is-loaded {
+      opacity: 1;
+    }
+  }
+
+  &__caption {
+    @include type.type-style('label-01');
+    color: var(--cds-text-helper);
+    margin-top: spacing.$spacing-03;
+    text-align: center;
+  }
+}
