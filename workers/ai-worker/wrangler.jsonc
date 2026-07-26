@@ -1,0 +1,80 @@
+/**
+ * emrearas.com AI Worker Configuration
+ * For more details: https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "emrearas-ai-worker",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-07-01",
+	/** Required by @anthropic-ai/sdk (imports Node built-ins). */
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": false,
+	"preview_urls": false,
+	"observability": {
+		"enabled": true
+	},
+	/**
+	 * The custom domain (ai-worker.emrearas.com) is attached in the Cloudflare
+	 * dashboard, not here — same as the other workers in this account. A
+	 * `routes` entry would try to own the domain on every deploy and fight the
+	 * dashboard binding. The site reaches the worker through
+	 * VITE_AI_WORKER_PRODUCTION_ENDPOINT, so this config never needs its own
+	 * hostname.
+	 */
+	/**
+	 * Text modules — the system prompt ships as a bundled .md import and the
+	 * llms-full fallback snapshots as bundled .txt imports.
+	 */
+	"rules": [
+		{
+			"type": "Text",
+			"globs": [
+				"**/*.md",
+				"**/*.txt"
+			],
+			"fallthrough": true
+		}
+	],
+	/**
+	 * D1 Database — hash-chained conversation logging. The database exists and
+	 * migration 0001 is applied; the commands below are for recreating it
+	 * elsewhere or working locally.
+	 *
+	 * Create database:
+	 *   npx wrangler d1 create emrearas-ai-logs
+	 *
+	 * Run migration (local):
+	 *   npx wrangler d1 execute emrearas-ai-logs --local --file=migrations/0001_create_conversation_logs.sql
+	 *
+	 * Run migration (remote/production):
+	 *   npx wrangler d1 execute emrearas-ai-logs --remote --file=migrations/0001_create_conversation_logs.sql
+	 *
+	 * Query (local):
+	 *   npx wrangler d1 execute emrearas-ai-logs --local --command="SELECT * FROM conversation_logs"
+	 *
+	 * Reset local database:
+	 *   rm -rf .wrangler/state/v3/d1/
+	 */
+	"d1_databases": [
+		{
+			"binding": "AI_LOGS_DB",
+			"database_name": "emrearas-ai-logs",
+			"database_id": "510d98e4-779b-4318-bb4e-e14b91717c80"
+		}
+	]
+	/**
+	 * Production Secrets (set via CLI):
+	 * npx wrangler secret put ANTHROPIC_API_KEY
+	 * npx wrangler secret put TURNSTILE_SECRET_KEY
+	 *
+	 * SESSION_SIGNING_KEY signs the session tokens and is never shown to a
+	 * client, so it only has to be long and random — generate and set it in
+	 * one go (rotating it just invalidates live sessions; clients re-solve
+	 * the Turnstile challenge and carry on):
+	 *   openssl rand -base64 48 | npx wrangler secret put SESSION_SIGNING_KEY
+	 */
+	/**
+	 * Development: use a .dev.vars file (see .dev.vars.example).
+	 */
+}

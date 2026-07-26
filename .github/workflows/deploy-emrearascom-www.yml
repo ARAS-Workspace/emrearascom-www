@@ -2,6 +2,13 @@ name: Deploy emrearascom-www
 on:
   push:
     branches: [main]
+    # The worker is a separate deployable with its own workflow; a commit that
+    # only touches it must not rebuild and redeploy the site. A commit that
+    # touches both still runs this (paths-ignore only skips when every changed
+    # file matches).
+    paths-ignore:
+      - 'workers/**'
+      - '.github/workflows/deploy-ai-worker.yml'
   workflow_dispatch:
 
 permissions:

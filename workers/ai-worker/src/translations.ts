@@ -1,0 +1,125 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+/*
+ * Copyright (C) 2026 Rıza Emre ARAS <r.emrearas@proton.me>
+ *
+ * This file is part of emrearas.com.
+ *
+ * emrearas.com is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version. See <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Localized user-facing strings. Only text that reaches the client lives
+ * here — internal log messages stay English in code.
+ */
+
+export type Locale = 'tr' | 'en';
+
+export interface Translations {
+	errors: {
+		invalidJson: string;
+		validationFailed: string;
+		invalidMessages: string;
+		emptyMessages: string;
+		tooManyMessages: string;
+		messageTooLong: string;
+		messageEmpty: string;
+		invalidRole: string;
+		firstMessageNotUser: string;
+		lastMessageNotUser: string;
+		invalidLocale: string;
+		payloadTooLarge: string;
+		endpointNotFound: string;
+		methodNotAllowed: string;
+		turnstileFailed: string;
+		turnstileTokenMissing: string;
+		sessionInvalid: string;
+		sessionExpired: string;
+		sessionCapacityReached: string;
+		rateLimitExceeded: string;
+		dailyCapacityReached: string;
+		integrityViolation: string;
+		apiError: string;
+		emptyResponse: string;
+		notImplemented: string;
+	};
+}
+
+const tr: Translations = {
+	errors: {
+		invalidJson: 'İstek gövdesi geçerli JSON değil.',
+		validationFailed: 'İstek doğrulanamadı. Ayrıntılar için details alanına bakın.',
+		invalidMessages: 'messages alanı geçerli bir mesaj listesi olmalıdır.',
+		emptyMessages: 'En az bir mesaj gönderilmelidir.',
+		tooManyMessages: 'Mesaj limiti aşıldı. Lütfen yeni bir sohbet başlatın.',
+		messageTooLong: 'Mesaj içeriği izin verilen uzunluğu aşıyor.',
+		messageEmpty: 'Mesaj içeriği boş olamaz.',
+		invalidRole: 'Mesaj rolleri yalnızca user veya assistant olabilir.',
+		firstMessageNotUser: 'Sohbet bir kullanıcı mesajı ile başlamalıdır.',
+		lastMessageNotUser: 'Sohbetin son mesajı bir kullanıcı mesajı olmalıdır.',
+		invalidLocale: 'Desteklenmeyen dil. Desteklenen diller: tr, en.',
+		payloadTooLarge: 'İstek gövdesi çok büyük.',
+		endpointNotFound: 'Uç nokta bulunamadı. Kullanılabilir: POST /api/v1/session, POST /api/v1/chat.',
+		methodNotAllowed: 'Bu uç nokta yalnızca POST isteklerini kabul eder.',
+		turnstileFailed: 'Güvenlik doğrulaması başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin.',
+		turnstileTokenMissing: 'Güvenlik doğrulama anahtarı eksik.',
+		sessionInvalid: 'Oturum doğrulanamadı. Lütfen tekrar deneyin.',
+		sessionExpired: 'Oturum süresi doldu. Yeni bir oturum başlatılıyor.',
+		sessionCapacityReached: 'Bu oturumun kapasitesi doldu. Lütfen yeni bir oturum başlatın.',
+		rateLimitExceeded: 'Çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.',
+		dailyCapacityReached: 'Günlük kapasite doldu. Lütfen yarın tekrar deneyin.',
+		integrityViolation: 'Sohbet geçmişi doğrulanamadı. Sohbet sıfırlanıyor.',
+		apiError: 'Yanıt üretilirken bir hata oluştu. Lütfen tekrar deneyin.',
+		emptyResponse: 'Üzgünüm, bir yanıt üretemedim. Lütfen sorunuzu farklı bir şekilde sormayı deneyin.',
+		notImplemented: 'Bu özellik henüz kullanıma açık değil.',
+	},
+};
+
+const en: Translations = {
+	errors: {
+		invalidJson: 'Request body is not valid JSON.',
+		validationFailed: 'Request validation failed. See the details field.',
+		invalidMessages: 'The messages field must be a valid message list.',
+		emptyMessages: 'At least one message is required.',
+		tooManyMessages: 'Message limit reached. Please start a new conversation.',
+		messageTooLong: 'Message content exceeds the allowed length.',
+		messageEmpty: 'Message content cannot be empty.',
+		invalidRole: 'Message roles must be either user or assistant.',
+		firstMessageNotUser: 'The conversation must start with a user message.',
+		lastMessageNotUser: 'The last message must be a user message.',
+		invalidLocale: 'Unsupported locale. Supported locales: tr, en.',
+		payloadTooLarge: 'Request body is too large.',
+		endpointNotFound: 'Endpoint not found. Available: POST /api/v1/session, POST /api/v1/chat.',
+		methodNotAllowed: 'This endpoint only accepts POST requests.',
+		turnstileFailed: 'Security verification failed. Please refresh the page and try again.',
+		turnstileTokenMissing: 'Security verification token is missing.',
+		sessionInvalid: 'Session could not be verified. Please try again.',
+		sessionExpired: 'Session expired. Starting a new session.',
+		sessionCapacityReached: "This session's capacity is used up. Please start a new session.",
+		rateLimitExceeded: 'Too many requests. Please wait a moment and try again.',
+		dailyCapacityReached: 'Daily capacity reached. Please try again tomorrow.',
+		integrityViolation: 'Conversation history could not be verified. Resetting the conversation.',
+		apiError: 'An error occurred while generating the response. Please try again.',
+		emptyResponse: "I'm sorry, I couldn't generate a response. Please try rephrasing your question.",
+		notImplemented: 'This feature is not available yet.',
+	},
+};
+
+const TRANSLATIONS: Record<Locale, Translations> = { tr, en };
+
+/**
+ * @example const t = getTranslations(locale);
+ */
+export function getTranslations(locale: Locale): Translations {
+	return TRANSLATIONS[locale];
+}
+
+/**
+ * Parse an untrusted locale value; falls back to the default.
+ * @example const locale = parseLocale(body.locale);
+ */
+export function parseLocale(value: unknown): Locale {
+	return value === 'en' || value === 'tr' ? value : 'tr';
+}
