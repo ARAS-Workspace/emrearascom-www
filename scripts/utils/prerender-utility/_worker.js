@@ -6,7 +6,7 @@ const DEFAULT_LOCALE = __DEFAULT_LOCALE__;
 const THEMES = __THEMES__;
 const DEFAULT_THEME = __DEFAULT_THEME__;
 
-// Cache policy. Content-hashed build output (`/assets/*.js|css`) can never
+// Cache policy. Content-hashed build output (`/assets/*.{js,css,woff2}`) can never
 // change under a given URL, so it is immutable and cached forever. Everything a
 // deploy can rewrite in place — HTML documents, llms markdown, sitemap/robots,
 // public images — must be revalidated, so a client never runs a stale HTML that
@@ -15,14 +15,14 @@ const IMMUTABLE = 'public, max-age=31536000, immutable';
 const REVALIDATE = 'no-cache';
 
 /**
- * Cache-Control for a static asset by path. Only Vite's hashed JS/CSS live at
- * `/assets/*.{js,css}` (public/ ships images/svg/cast, never js/css there), so
- * that pattern is a safe immutable signal; anything else revalidates.
+ * Cache-Control for a static asset by path. Only Vite's hashed JS/CSS/woff2 live
+ * at `/assets/*.{js,css,woff2}` (public/ ships images/svg/cast, never these there),
+ * so that pattern is a safe immutable signal; anything else revalidates.
  * @param {string} pathname
  * @returns {string}
  */
 function assetCacheControl(pathname) {
-  return /^\/assets\/.+\.(js|css)$/i.test(pathname) ? IMMUTABLE : REVALIDATE;
+  return /^\/assets\/.+\.(js|css|woff2)$/i.test(pathname) ? IMMUTABLE : REVALIDATE;
 }
 
 /**
