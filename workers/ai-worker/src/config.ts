@@ -107,10 +107,12 @@ export const CONFIG = {
 		ttlSeconds: 3600,
 
 		/**
-		 * Hostnames accepted from the Turnstile siteverify response
+		 * Hostnames accepted from the Turnstile siteverify response. Local
+		 * development is covered by its own short-circuit, so this list is
+		 * production-only on purpose.
 		 * @example if (!CONFIG.session.expectedHostnames.includes(data.hostname))
 		 */
-		expectedHostnames: ['www.emrearas.com', 'localhost'],
+		expectedHostnames: ['www.emrearas.com'],
 	},
 
 	/**

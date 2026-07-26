@@ -23,15 +23,13 @@
 	 * hostname.
 	 */
 	/**
-	 * Text modules — the system prompt ships as a bundled .md import and the
-	 * llms-full fallback snapshots as bundled .txt imports.
+	 * Text module — the system prompt ships as a bundled .md import.
 	 */
 	"rules": [
 		{
 			"type": "Text",
 			"globs": [
-				"**/*.md",
-				"**/*.txt"
+				"**/*.md"
 			],
 			"fallthrough": true
 		}

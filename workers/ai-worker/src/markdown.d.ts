@@ -12,14 +12,10 @@
  * option) any later version. See <https://www.gnu.org/licenses/>.
  */
 
-/** Text modules bundled via wrangler `rules` (Text: *.md, *.txt). */
+/** The system prompt, bundled as a text module via wrangler `rules`. */
 
 declare module '*.md' {
 	const content: string;
 	export default content;
 }
 
-declare module '*.txt' {
-	const content: string;
-	export default content;
-}

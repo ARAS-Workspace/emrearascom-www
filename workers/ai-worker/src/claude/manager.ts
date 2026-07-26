@@ -30,6 +30,12 @@ import type { ChatMessage } from '../types';
 export interface StreamCallbacks {
 	/** One raw text delta — forwarded verbatim; byte-identity depends on it. */
 	onDelta(text: string): Promise<void> | void;
+	/**
+	 * Running token usage, updated as the stream reports it. A turn the client
+	 * abandons never reaches `finalMessage()`, so this is the only way its
+	 * spend can still be charged against the budgets.
+	 */
+	onUsage(usage: { input_tokens: number; output_tokens: number }): void;
 }
 
 export interface StreamResult {
@@ -70,11 +76,23 @@ export async function streamChatCompletion(
 		{ signal },
 	);
 
+	// Input is reported once at message_start, output grows with message_delta.
+	// Both are surfaced as they arrive so an abandoned turn is still billable.
 	let text = '';
+	let inputTokens = 0;
+	let outputTokens = 0;
 	for await (const event of stream) {
-		if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+		if (event.type === 'message_start') {
+			const { usage } = event.message;
+			inputTokens =
+				usage.input_tokens + (usage.cache_creation_input_tokens ?? 0) + (usage.cache_read_input_tokens ?? 0);
+			callbacks.onUsage({ input_tokens: inputTokens, output_tokens: outputTokens });
+		} else if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
 			text += event.delta.text;
 			await callbacks.onDelta(event.delta.text);
+		} else if (event.type === 'message_delta') {
+			outputTokens = event.usage.output_tokens;
+			callbacks.onUsage({ input_tokens: inputTokens, output_tokens: outputTokens });
 		}
 	}
 

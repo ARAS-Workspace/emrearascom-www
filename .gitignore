@@ -32,6 +32,9 @@ public/assets/blog/
 .env.development
 .env.production
 
+# Wrangler runtime secrets (workers keep their own ignore too)
+.dev.vars
+
 # IDE - WebStorm & Development Tools
 .idea/
 *.iml

@@ -19,8 +19,14 @@ import type { Env } from '../types';
  * insert is awaited before the SSE `done` event, so these sums are
  * consistent by the next request.
  *
- *  - Conversation limit: SUM over the chain (idx_chain_id).
- *  - Daily wallet fuse:  SUM over the UTC day (idx_logs_created).
+ * Both sums span two tables: completed turns in `conversation_logs` and, in
+ * `usage_ledger`, the spend of turns the client abandoned mid-stream. Those
+ * were generated and billed but must never enter the hash chain, so leaving
+ * them out of the sums would let an abandoned request cost money that no
+ * ceiling counts.
+ *
+ *  - Conversation limit: SUM over the chain (idx_chain_id / idx_usage_chain_id).
+ *  - Daily wallet fuse:  SUM over the UTC day (idx_logs_created / idx_usage_created).
  *
  * Runs AFTER integrity verification (needs the chain identity); genesis
  * requests only face the daily fuse. Skipped in development.
@@ -49,7 +55,8 @@ export async function checkBudgets(env: Env, chainId: string | null): Promise<Bu
 	if (chainId !== null) {
 		const chainTokens = await sumTokens(
 			env,
-			'SELECT SUM(tokens_in + tokens_out) AS total FROM conversation_logs WHERE chain_id = ?',
+			`SELECT (SELECT COALESCE(SUM(tokens_in + tokens_out), 0) FROM conversation_logs WHERE chain_id = ?1)
+			      + (SELECT COALESCE(SUM(tokens_in + tokens_out), 0) FROM usage_ledger WHERE chain_id = ?1) AS total`,
 			[chainId],
 		);
 		if (chainTokens >= CONFIG.budget.tokensPerSession) {
@@ -60,7 +67,8 @@ export async function checkBudgets(env: Env, chainId: string | null): Promise<Bu
 	const utcDayStartMs = Math.floor(Date.now() / (SECONDS_PER_DAY * 1000)) * SECONDS_PER_DAY * 1000;
 	const dailyTokens = await sumTokens(
 		env,
-		'SELECT SUM(tokens_in + tokens_out) AS total FROM conversation_logs WHERE created_at >= ?',
+		`SELECT (SELECT COALESCE(SUM(tokens_in + tokens_out), 0) FROM conversation_logs WHERE created_at >= ?1)
+		      + (SELECT COALESCE(SUM(tokens_in + tokens_out), 0) FROM usage_ledger WHERE created_at >= ?1) AS total`,
 		[utcDayStartMs],
 	);
 	if (dailyTokens >= CONFIG.budget.tokensPerDay) {

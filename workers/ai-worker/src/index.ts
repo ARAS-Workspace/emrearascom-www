@@ -25,7 +25,15 @@
 import { streamChatCompletion } from './claude/manager';
 import { CONFIG } from './config';
 import { corsHeaders, preflightResponse } from './cors';
-import { hashBlock, hashContext as hashContextOf, hashIp, logConversationBlock, verifyHistory } from './integrity/chain';
+import {
+	hashBlock,
+	hashContext as hashContextOf,
+	hashIp,
+	logConversationBlock,
+	releaseUsageReservation,
+	reserveUsage,
+	verifyHistory,
+} from './integrity/chain';
 import { canonicalizeMessages, normalizeMessages } from './integrity/normalize';
 import { getLlmsContext } from './llms/context';
 import { checkBudgets } from './middleware/budget';
@@ -57,8 +65,12 @@ export default {
 				return errorResponse(request, env, 'METHOD_NOT_ALLOWED', t.errors.methodNotAllowed, 405);
 			}
 
-			const contentLength = parseInt(request.headers.get('Content-Length') ?? '0', 10);
-			if (contentLength > CONFIG.validation.maxRequestBodySize) {
+			// Content-Length is a client-supplied hint: absent (chunked upload)
+			// or unparseable, it must not read as "no body". Treat only a
+			// declared, over-cap length as an early reject; the real enforcement
+			// is on the bytes themselves, below.
+			const declaredLength = Number.parseInt(request.headers.get('Content-Length') ?? '', 10);
+			if (Number.isFinite(declaredLength) && declaredLength > CONFIG.validation.maxRequestBodySize) {
 				return errorResponse(request, env, 'PAYLOAD_TOO_LARGE', t.errors.payloadTooLarge, 413);
 			}
 
@@ -104,6 +116,7 @@ async function handleSession(request: Request, env: Env, _ctx: ExecutionContext)
 
 	const verdict = await verifyTurnstileToken(env, turnstileToken, getClientIp(request));
 	if (!verdict.ok) {
+		logWarn('session_turnstile_rejected', { errorCodes: verdict.errorCodes });
 		return errorResponse(request, env, 'TURNSTILE_FAILED', t.errors.turnstileFailed, 403);
 	}
 
@@ -200,6 +213,34 @@ async function handleChat(request: Request, env: Env, _ctx: ExecutionContext): P
 		}
 	};
 
+	const chainIdForUsage = integrity.kind === 'continuation' ? integrity.anchor.chain_id : integrity.chainId;
+
+	/**
+	 * Charge this turn's spend the moment the model reports it, while the
+	 * request is still alive. A client that disconnects mid-stream takes the
+	 * request context down with it, so nothing after the abort can be relied on
+	 * to run — a turn accounted only at the end would cost money no ceiling ever
+	 * counted. The reservation is released once the turn is written as a block.
+	 */
+	let reservationId: number | null = null;
+	const reserve = async (usage: { input_tokens: number; output_tokens: number }): Promise<void> => {
+		if (reservationId !== null || usage.input_tokens === 0) {
+			return;
+		}
+		try {
+			reservationId = await reserveUsage(env, {
+				chainId: chainIdForUsage,
+				locale: validation.locale,
+				ipHash: await hashIp(getClientIp(request)),
+				model: CONFIG.claude.model,
+				tokensIn: usage.input_tokens,
+				tokensOut: usage.output_tokens,
+			});
+		} catch (error) {
+			logError('usage_reservation_failed', error, { sid: session.sid });
+		}
+	};
+
 	const pump = async (): Promise<void> => {
 		let streamedText = '';
 		try {
@@ -213,11 +254,15 @@ async function handleChat(request: Request, env: Env, _ctx: ExecutionContext): P
 						streamedText += text;
 						await write(sseEvent('delta', { text }));
 					},
+					onUsage: (usage) => {
+						void reserve(usage);
+					},
 				},
 				upstream.signal,
 			);
 
 			if (clientGone) {
+				// Accounting already ran from `cancel()`.
 				logInfo('chat_aborted', { sid: session.sid, streamed: streamedText.length });
 				return;
 			}
@@ -262,6 +307,16 @@ async function handleChat(request: Request, env: Env, _ctx: ExecutionContext): P
 
 			await logConversationBlock(env, block);
 
+			// The block now carries the authoritative numbers; drop the
+			// reservation so this turn is not counted twice.
+			if (reservationId !== null) {
+				try {
+					await releaseUsageReservation(env, reservationId);
+				} catch (error) {
+					logError('usage_release_failed', error, { sid: session.sid });
+				}
+			}
+
 			await write(
 				sseEvent('done', {
 					id: result.id,
@@ -303,6 +358,8 @@ async function handleChat(request: Request, env: Env, _ctx: ExecutionContext): P
 		cancel() {
 			clientGone = true;
 			upstream.abort();
+			// Nothing to record here: the spend was already reserved while the
+			// stream was running, and only a completed turn releases it.
 		},
 	});
 

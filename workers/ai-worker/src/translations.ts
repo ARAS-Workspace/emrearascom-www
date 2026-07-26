@@ -15,6 +15,8 @@
  * here — internal log messages stay English in code.
  */
 
+import { CONFIG } from './config';
+
 export type Locale = 'tr' | 'en';
 
 export interface Translations {
@@ -29,21 +31,17 @@ export interface Translations {
 		invalidRole: string;
 		firstMessageNotUser: string;
 		lastMessageNotUser: string;
-		invalidLocale: string;
 		payloadTooLarge: string;
 		endpointNotFound: string;
 		methodNotAllowed: string;
 		turnstileFailed: string;
 		turnstileTokenMissing: string;
 		sessionInvalid: string;
-		sessionExpired: string;
 		sessionCapacityReached: string;
-		rateLimitExceeded: string;
 		dailyCapacityReached: string;
 		integrityViolation: string;
 		apiError: string;
 		emptyResponse: string;
-		notImplemented: string;
 	};
 }
 
@@ -59,21 +57,17 @@ const tr: Translations = {
 		invalidRole: 'Mesaj rolleri yalnızca user veya assistant olabilir.',
 		firstMessageNotUser: 'Sohbet bir kullanıcı mesajı ile başlamalıdır.',
 		lastMessageNotUser: 'Sohbetin son mesajı bir kullanıcı mesajı olmalıdır.',
-		invalidLocale: 'Desteklenmeyen dil. Desteklenen diller: tr, en.',
 		payloadTooLarge: 'İstek gövdesi çok büyük.',
 		endpointNotFound: 'Uç nokta bulunamadı. Kullanılabilir: POST /api/v1/session, POST /api/v1/chat.',
 		methodNotAllowed: 'Bu uç nokta yalnızca POST isteklerini kabul eder.',
 		turnstileFailed: 'Güvenlik doğrulaması başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin.',
 		turnstileTokenMissing: 'Güvenlik doğrulama anahtarı eksik.',
 		sessionInvalid: 'Oturum doğrulanamadı. Lütfen tekrar deneyin.',
-		sessionExpired: 'Oturum süresi doldu. Yeni bir oturum başlatılıyor.',
 		sessionCapacityReached: 'Bu oturumun kapasitesi doldu. Lütfen yeni bir oturum başlatın.',
-		rateLimitExceeded: 'Çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.',
 		dailyCapacityReached: 'Günlük kapasite doldu. Lütfen yarın tekrar deneyin.',
 		integrityViolation: 'Sohbet geçmişi doğrulanamadı. Sohbet sıfırlanıyor.',
 		apiError: 'Yanıt üretilirken bir hata oluştu. Lütfen tekrar deneyin.',
 		emptyResponse: 'Üzgünüm, bir yanıt üretemedim. Lütfen sorunuzu farklı bir şekilde sormayı deneyin.',
-		notImplemented: 'Bu özellik henüz kullanıma açık değil.',
 	},
 };
 
@@ -89,21 +83,17 @@ const en: Translations = {
 		invalidRole: 'Message roles must be either user or assistant.',
 		firstMessageNotUser: 'The conversation must start with a user message.',
 		lastMessageNotUser: 'The last message must be a user message.',
-		invalidLocale: 'Unsupported locale. Supported locales: tr, en.',
 		payloadTooLarge: 'Request body is too large.',
 		endpointNotFound: 'Endpoint not found. Available: POST /api/v1/session, POST /api/v1/chat.',
 		methodNotAllowed: 'This endpoint only accepts POST requests.',
 		turnstileFailed: 'Security verification failed. Please refresh the page and try again.',
 		turnstileTokenMissing: 'Security verification token is missing.',
 		sessionInvalid: 'Session could not be verified. Please try again.',
-		sessionExpired: 'Session expired. Starting a new session.',
 		sessionCapacityReached: "This session's capacity is used up. Please start a new session.",
-		rateLimitExceeded: 'Too many requests. Please wait a moment and try again.',
 		dailyCapacityReached: 'Daily capacity reached. Please try again tomorrow.',
 		integrityViolation: 'Conversation history could not be verified. Resetting the conversation.',
 		apiError: 'An error occurred while generating the response. Please try again.',
 		emptyResponse: "I'm sorry, I couldn't generate a response. Please try rephrasing your question.",
-		notImplemented: 'This feature is not available yet.',
 	},
 };
 
@@ -121,5 +111,7 @@ export function getTranslations(locale: Locale): Translations {
  * @example const locale = parseLocale(body.locale);
  */
 export function parseLocale(value: unknown): Locale {
-	return value === 'en' || value === 'tr' ? value : 'tr';
+	return (CONFIG.localization.supportedLocales as readonly string[]).includes(value as string)
+		? (value as Locale)
+		: CONFIG.localization.defaultLocale;
 }

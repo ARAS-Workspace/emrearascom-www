@@ -65,8 +65,8 @@ export async function hashBlock(input: {
 }
 
 export type IntegrityCheck =
-	| { kind: 'genesis'; chainId: string; contextHash: string }
-	| { kind: 'continuation'; anchor: ChainAnchor; contextHash: string }
+	| { kind: 'genesis'; chainId: string }
+	| { kind: 'continuation'; anchor: ChainAnchor }
 	| { kind: 'violation' };
 
 /**
@@ -80,7 +80,7 @@ export async function verifyHistory(env: Env, messages: ChatMessage[]): Promise<
 		const chainId = [...crypto.getRandomValues(new Uint8Array(32))]
 			.map((byte) => byte.toString(16).padStart(2, '0'))
 			.join('');
-		return { kind: 'genesis', chainId, contextHash: await hashContext(messages) };
+		return { kind: 'genesis', chainId };
 	}
 
 	// Continuation — the prior context (everything before the new user
@@ -98,7 +98,7 @@ export async function verifyHistory(env: Env, messages: ChatMessage[]): Promise<
 		return { kind: 'violation' };
 	}
 
-	return { kind: 'continuation', anchor, contextHash: await hashContext(messages) };
+	return { kind: 'continuation', anchor };
 }
 
 /**
@@ -133,6 +133,51 @@ export async function logConversationBlock(env: Env, block: ConversationBlock): 
 			block.created_at,
 		)
 		.run();
+}
+
+/**
+ * Charge a turn's spend up front, while the request is still alive.
+ *
+ * A client that disconnects mid-stream still had its prompt generated and
+ * billed, but the runtime tears the cancelled request down — nothing after
+ * the abort is guaranteed to run, so accounting cannot wait until then.
+ * Instead the spend is reserved as soon as the model reports it and released
+ * again by {@link releaseUsageReservation} once the turn lands in
+ * `conversation_logs`, which then carries the authoritative numbers.
+ *
+ * Reservations live outside `conversation_logs` so they can never be mistaken
+ * for an anchorable turn, and the budgets sum both tables.
+ *
+ * @example const id = await reserveUsage(env, { chainId, tokensIn, ... });
+ */
+export async function reserveUsage(
+	env: Env,
+	entry: {
+		chainId: string | null;
+		locale: string;
+		ipHash: string | null;
+		model: string;
+		tokensIn: number;
+		tokensOut: number;
+	},
+): Promise<number | null> {
+	const row = await env.AI_LOGS_DB.prepare(
+		`INSERT INTO usage_ledger (chain_id, reason, locale, ip_hash, model, tokens_in, tokens_out, created_at)
+		 VALUES (?, 'in_flight', ?, ?, ?, ?, ?, ?) RETURNING id`,
+	)
+		.bind(entry.chainId, entry.locale, entry.ipHash, entry.model, entry.tokensIn, entry.tokensOut, Date.now())
+		.first<{ id: number }>();
+
+	return row?.id ?? null;
+}
+
+/**
+ * Drop a reservation once the completed turn has been written as a block, so
+ * the same tokens are not counted twice.
+ * @example await releaseUsageReservation(env, reservationId);
+ */
+export async function releaseUsageReservation(env: Env, id: number): Promise<void> {
+	await env.AI_LOGS_DB.prepare('DELETE FROM usage_ledger WHERE id = ?').bind(id).run();
 }
 
 /**
