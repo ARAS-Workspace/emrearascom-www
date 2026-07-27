@@ -15,18 +15,25 @@ import { getTranslations, parseLocale } from '../translations';
 import type { ChatMessage, ChatRequest, ValidationDetail } from '../types';
 import type { Locale } from '../translations';
 
+const encoder = new TextEncoder();
+
 /**
  * Chat body validation. Unknown/legacy fields (stream, max_tokens,
  * temperature, turnstileToken) are IGNORED, never rejected — the old
  * frontend keeps working. An invalid `locale` silently falls back to the
- * default; the integrity flow additionally requires the first AND last
- * message to be user turns. Detail messages are localized; the frontend
- * renders `details` as a table.
+ * default. The first and last message must both be user turns — enforced
+ * here, because the integrity chain downstream assumes it: it hashes
+ * everything before the trailing user message as the prior context. Detail
+ * messages are localized and returned in `details`; no client renders them.
  */
 
 export type ValidationResult =
 	| { valid: true; request: ChatRequest; locale: Locale }
-	| { valid: false; details: ValidationDetail[]; locale: Locale };
+	// `full` is not a malformed request — the conversation simply reached the
+	// length this agent carries. It gets its own outcome so the client can say
+	// so plainly instead of showing a validation error.
+	| { valid: false; full: true; locale: Locale }
+	| { valid: false; full?: false; details: ValidationDetail[]; locale: Locale };
 
 /**
  * @example const result = validateChatRequest(rawBody);
@@ -45,7 +52,7 @@ export function validateChatRequest(rawBody: unknown): ValidationResult {
 		return { valid: false, details: [{ field: 'messages', message: t.errors.emptyMessages }], locale };
 	}
 	if (rawMessages.length > CONFIG.validation.maxMessagesPerRequest) {
-		return { valid: false, details: [{ field: 'messages', message: t.errors.tooManyMessages }], locale };
+		return { valid: false, full: true, locale };
 	}
 
 	const messages: ChatMessage[] = [];
@@ -70,12 +77,16 @@ export function validateChatRequest(rawBody: unknown): ValidationResult {
 			details.push({ field: `messages[${i}].content`, message: t.errors.messageEmpty });
 			continue;
 		}
-		if (content.length > CONFIG.validation.maxMessageLength) {
+		// Measured in bytes, not characters, because the request body cap it has
+		// to stay under is measured in bytes. A character count would let a
+		// conversation of non-Latin text pass every message check and still be
+		// refused as oversized, which is the one refusal this design does not
+		// want: a finished conversation must say it is finished.
+		if (encoder.encode(content).length > CONFIG.validation.maxMessageLength) {
 			details.push({ field: `messages[${i}].content`, message: t.errors.messageTooLong });
 			continue;
 		}
 
-		// Canonical shape only — unknown per-message properties are dropped.
 		messages.push({ role, content });
 	}
 
@@ -93,5 +104,5 @@ export function validateChatRequest(rawBody: unknown): ValidationResult {
 		return { valid: false, details, locale };
 	}
 
-	return { valid: true, request: { messages, locale }, locale };
+	return { valid: true, request: { messages }, locale };
 }

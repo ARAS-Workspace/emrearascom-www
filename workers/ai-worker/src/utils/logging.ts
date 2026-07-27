@@ -12,7 +12,8 @@
 
 /**
  * Structured console logging — picked up by Workers observability.
- * Never log message contents, tokens or raw IPs here.
+ * Never log message contents or raw IPs here. Aggregate token counts are
+ * logged — see the `chat_completed` event.
  */
 
 export function logInfo(event: string, data: Record<string, unknown> = {}): void {

@@ -72,8 +72,11 @@ export async function issueSessionToken(signingKey: string): Promise<{ token: st
 }
 
 /**
- * Verify signature + expiry; constant-time signature comparison. Returns
- * the payload or null (caller maps null to 401).
+ * Verify signature + expiry; constant-time signature comparison. Returns the
+ * payload or null, which the caller maps to 401.
+ *
+ * The order is load-bearing: the HMAC is checked before the payload is decoded
+ * and parsed, so attacker-supplied bytes never reach `JSON.parse`.
  * @example const payload = await verifySessionToken(bearer, env.SESSION_SIGNING_KEY);
  */
 export async function verifySessionToken(token: string, signingKey: string): Promise<SessionPayload | null> {

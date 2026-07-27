@@ -31,9 +31,17 @@ export interface StreamCallbacks {
 	/** One raw text delta — forwarded verbatim; byte-identity depends on it. */
 	onDelta(text: string): Promise<void> | void;
 	/**
-	 * Running token usage, updated as the stream reports it. A turn the client
-	 * abandons never reaches `finalMessage()`, so this is the only way its
-	 * spend can still be charged against the budgets.
+	 * Running token usage, as the stream reports it — a turn the client abandons
+	 * never reaches `finalMessage()`, so this is the only place its spend can be
+	 * seen at all.
+	 *
+	 * The two reports are not symmetrical. Input arrives once, at
+	 * `message_start`, so it is counted even for a turn interrupted a moment
+	 * later. Output arrives only at `message_delta`, which the API emits after
+	 * generation finishes — so a turn abandoned mid-generation reports zero
+	 * output, and the tokens it did generate go uncounted. Input dominates here
+	 * (measured: ~6.5K of context against at most `claude.maxTokens` out), so
+	 * the gap is bounded and small, but it is a gap.
 	 */
 	onUsage(usage: { input_tokens: number; output_tokens: number }): void;
 }
@@ -47,7 +55,7 @@ export interface StreamResult {
 }
 
 /**
- * @example const result = await streamChatCompletion(apiKey, messages, llmsContext, callbacks, signal);
+ * @example const result = await streamChatCompletion(apiKey, baseURL, messages, llmsContext, callbacks, signal);
  */
 export async function streamChatCompletion(
 	apiKey: string,
@@ -76,8 +84,9 @@ export async function streamChatCompletion(
 		{ signal },
 	);
 
-	// Input is reported once at message_start, output grows with message_delta.
-	// Both are surfaced as they arrive so an abandoned turn is still billable.
+	// Input is reported once at message_start; output only at message_delta,
+	// which lands after generation completes. Both are surfaced the moment they
+	// arrive, which is what lets an interrupted turn be counted at all.
 	let text = '';
 	let inputTokens = 0;
 	let outputTokens = 0;

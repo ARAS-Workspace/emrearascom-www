@@ -23,7 +23,7 @@ import type { SseDeltaEvent, SseDoneEvent, SseErrorEvent } from '../types';
 
 const encoder = new TextEncoder();
 
-export type SseEventName = 'delta' | 'done' | 'error';
+type SseEventName = 'delta' | 'done' | 'error';
 
 /**
  * @example controller.enqueue(sseEvent('delta', { text }));

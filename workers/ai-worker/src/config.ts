@@ -63,7 +63,7 @@ export const CONFIG = {
 		 * Extra origins allowed only when ENVIRONMENT === 'development'
 		 * @example [...CONFIG.cors.allowedOrigins, ...CONFIG.cors.devOrigins]
 		 */
-		devOrigins: ['https://localhost:5173', 'http://localhost:5173', 'http://localhost:8791'],
+		devOrigins: ['https://localhost:5174', 'https://localhost:5173', 'http://localhost:5173', 'http://localhost:8791'],
 
 		/**
 		 * Preflight cache lifetime in seconds
@@ -77,23 +77,46 @@ export const CONFIG = {
 	 */
 	validation: {
 		/**
-		 * Maximum length of a single message content
+		 * Longest a single message may be, in bytes.
+		 *
+		 * Bytes rather than characters so it can be reasoned about against the
+		 * body cap, which is also bytes: a full conversation of this length must
+		 * still fit inside it, so that a conversation ends by reaching its
+		 * message limit and never by being too large to send. Counting
+		 * characters instead would make that guarantee hold for Latin text and
+		 * quietly fail for everything else. See `maxRequestBodySize`.
+		 *
 		 * @example if (message.content.length > CONFIG.validation.maxMessageLength)
 		 */
-		maxMessageLength: 16384,
+		maxMessageLength: 4096,
 
 		/**
-		 * Maximum number of messages in a single request.
-		 * The UI starts a fresh chain (rollover) when this cap is reached.
+		 * How long a single conversation may get, in messages. Reaching it ends
+		 * that conversation: the request is refused and the visitor starts a new
+		 * one. Nothing rolls over silently — an agent that quietly forgot the
+		 * first half of a conversation would be worse than one that says so.
 		 * @example if (messages.length > CONFIG.validation.maxMessagesPerRequest)
 		 */
 		maxMessagesPerRequest: 50,
 
 		/**
-		 * Maximum request body size in bytes (64KB)
+		 * Largest request body accepted, in bytes.
+		 *
+		 * Sized so the message-count cap is always the binding one. Both caps are
+		 * in bytes, so the largest legitimate conversation is exactly
+		 * `maxMessageLength * maxMessagesPerRequest` = 200 KB of content, and
+		 * what remains covers the JSON envelope around it — measured at 201 KB
+		 * for a full conversation of Turkish text. That holds for a body encoded
+		 * as UTF-8, which is what `JSON.stringify` produces; a client that
+		 * escapes every non-ASCII character instead triples its own payload and
+		 * will meet this cap first. A lower cap would
+		 * reject a full conversation as oversized before the worker could tell
+		 * the client that the conversation is simply finished, and the client
+		 * treats those two refusals very differently.
+		 *
 		 * @example if (contentLength > CONFIG.validation.maxRequestBodySize)
 		 */
-		maxRequestBodySize: 65536,
+		maxRequestBodySize: 262144,
 	},
 
 	/**
@@ -116,26 +139,20 @@ export const CONFIG = {
 	},
 
 	/**
-	 * Token Budgets — the whole rate-limit model.
+	 * The day's token ceiling — the whole rate-limit model.
 	 *
-	 * Turnstile is the human gate; the conversation budget is the
-	 * session's overall limit; the daily budget is the wallet fuse. No
-	 * separate store: both are derived from D1 (the integrity layer logs
-	 * every turn's tokens anyway, awaited before the SSE `done`).
+	 * Turnstile is the human gate. Beyond it nothing is metered per visitor or
+	 * per conversation: the agent is a feature of this site, not something sold
+	 * by the turn, and a visitor who asks a lot of questions is using it as
+	 * intended. The only ceiling is what the day costs.
 	 */
 	budget: {
 		/**
-		 * Maximum tokens (input+output) per conversation chain. A real
-		 * user with working prompt-cache burns ~60-75K over the 25-turn
-		 * context cap; an abuser gets a deterministic per-chain ceiling.
-		 * @example if (chainTokens >= CONFIG.budget.tokensPerSession)
-		 */
-		tokensPerSession: 200000,
-
-		/**
-		 * Maximum tokens consumed per UTC day (all users, wallet fuse).
-		 * Invisible in normal traffic; caps the worst day at a fixed cost.
-		 * @example if (totalTokens >= CONFIG.budget.tokensPerDay)
+		 * Maximum tokens across everyone, per UTC day. Invisible in normal
+		 * traffic; caps the worst day at a fixed cost. Measured on real
+		 * conversations, a question costs ~7-8.5K tokens, so this is on the
+		 * order of 250 questions a day for the whole site.
+		 * @example if ((await readDailyUsage(env)) >= CONFIG.budget.tokensPerDay)
 		 */
 		tokensPerDay: 2000000,
 	},
@@ -165,7 +182,7 @@ export const CONFIG = {
 	localization: {
 		/**
 		 * Default locale for error messages and responses
-		 * @example locale: chatRequest.locale || CONFIG.localization.defaultLocale
+		 * @example const locale = parseLocale(body.locale); // falls back to this
 		 */
 		defaultLocale: 'tr' as 'tr' | 'en',
 

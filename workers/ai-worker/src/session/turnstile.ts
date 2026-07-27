@@ -16,7 +16,7 @@ import type { Env, TurnstileVerifyResponse } from '../types';
 
 /**
  * Cloudflare Turnstile server-side verification (siteverify).
- * Sends secret + response + remoteip + idempotency_key; requires `success`
+ * Sends secret + response + remoteip; requires `success`
  * AND an allowlisted response `hostname` (skipped in development, where
  * dummy keys report placeholder hostnames). Fails closed on network errors.
  * @see https://developers.cloudflare.com/turnstile/get-started/server-side-validation/
@@ -41,7 +41,6 @@ export async function verifyTurnstileToken(env: Env, token: string, remoteIp: st
 				secret: env.TURNSTILE_SECRET_KEY,
 				response: token,
 				remoteip: remoteIp,
-				idempotency_key: crypto.randomUUID(),
 			}),
 		});
 

@@ -9,8 +9,7 @@
 		"typecheck": "tsc --noEmit",
 		"deploy": "dotenv -- wrangler deploy",
 		"dev": "dotenv -- wrangler dev --port 8791",
-		"start": "dotenv -- wrangler dev --port 8791",
-		"cf-typegen": "dotenv -- wrangler types"
+		"start": "dotenv -- wrangler dev --port 8791"
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "0.115.0"

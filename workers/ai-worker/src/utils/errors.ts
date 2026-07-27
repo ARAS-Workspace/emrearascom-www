@@ -15,12 +15,14 @@ import type { Env, ErrorResponseBody, ErrorType, ValidationDetail } from '../typ
 
 /**
  * JSON error responses. The envelope is kept verbatim from the reference
- * implementation — the frontend parses body-level `status`, `retryAfter`
- * and the `details` table:
- * `{ error: { type, message, details? }, status, retryAfter? }`
+ * implementation: `{ error: { type, message, details? }, status, retryAfter? }`.
+ * This site's chat reads `error.type` and `error.message`: the type decides
+ * whether a refusal is retryable or ends the conversation, so it is part of the
+ * contract rather than decoration. `status`, `retryAfter` and `details` are
+ * carried for other clients and rendered by none.
  */
 
-export interface ErrorOptions {
+interface ErrorOptions {
 	details?: ValidationDetail[];
 	retryAfter?: number;
 }

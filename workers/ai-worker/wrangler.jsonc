@@ -35,30 +35,32 @@
 		}
 	],
 	/**
-	 * D1 Database — hash-chained conversation logging. The database exists and
-	 * migration 0001 is applied; the commands below are for recreating it
-	 * elsewhere or working locally.
+	 * D1 Database — the conversation record and integrity chain
+	 * (conversation_logs) plus the daily token meter (daily_usage). Both are
+	 * required at runtime and both are created by the single schema migration.
+	 * The commands below are for recreating the database elsewhere or working
+	 * locally.
 	 *
 	 * Create database:
 	 *   npx wrangler d1 create emrearas-ai-logs
 	 *
-	 * Run migration (local):
-	 *   npx wrangler d1 execute emrearas-ai-logs --local --file=migrations/0001_create_conversation_logs.sql
+	 * Apply the schema (local):
+	 *   npx wrangler d1 migrations apply emrearas-ai-logs --local
 	 *
-	 * Run migration (remote/production):
-	 *   npx wrangler d1 execute emrearas-ai-logs --remote --file=migrations/0001_create_conversation_logs.sql
+	 * Apply the schema (remote/production):
+	 *   npx wrangler d1 migrations apply emrearas-ai-logs --remote
 	 *
 	 * Query (local):
 	 *   npx wrangler d1 execute emrearas-ai-logs --local --command="SELECT * FROM conversation_logs"
 	 *
-	 * Reset local database:
-	 *   rm -rf .wrangler/state/v3/d1/
+	 * Reset local database (migrations have to be re-applied afterwards):
+	 *   rm -rf .wrangler/state
 	 */
 	"d1_databases": [
 		{
 			"binding": "AI_LOGS_DB",
 			"database_name": "emrearas-ai-logs",
-			"database_id": "510d98e4-779b-4318-bb4e-e14b91717c80"
+			"database_id": "bf7039c2-e56f-44ce-92a1-3477d39cb836"
 		}
 	]
 	/**

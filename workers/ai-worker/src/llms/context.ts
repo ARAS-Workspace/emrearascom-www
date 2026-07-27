@@ -26,10 +26,16 @@ import type { Locale } from '../translations';
  * the user could not be chatting in the first place.
  */
 
-export class LlmsContextError extends Error {}
+class LlmsContextError extends Error {}
+
+/** How long the site context may take to arrive before the turn is refused. */
+const FETCH_TIMEOUT_MS = 5_000;
 
 async function fetchOnce(url: string): Promise<string> {
-	const response = await fetch(url, { cache: 'no-store' });
+	// Bounded on purpose: this runs before the response has started, so a fetch
+	// that hangs holds the whole request open with nothing on screen. Failing
+	// fast turns that into the 503 the caller already handles.
+	const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
 	if (!response.ok) {
 		throw new LlmsContextError(`llms fetch failed: ${response.status}`);
 	}

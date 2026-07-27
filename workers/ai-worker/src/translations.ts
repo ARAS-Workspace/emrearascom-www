@@ -25,7 +25,6 @@ export interface Translations {
 		validationFailed: string;
 		invalidMessages: string;
 		emptyMessages: string;
-		tooManyMessages: string;
 		messageTooLong: string;
 		messageEmpty: string;
 		invalidRole: string;
@@ -37,8 +36,8 @@ export interface Translations {
 		turnstileFailed: string;
 		turnstileTokenMissing: string;
 		sessionInvalid: string;
-		sessionCapacityReached: string;
-		dailyCapacityReached: string;
+		conversationFull: string;
+		agentUnavailable: string;
 		integrityViolation: string;
 		apiError: string;
 		emptyResponse: string;
@@ -51,7 +50,6 @@ const tr: Translations = {
 		validationFailed: 'İstek doğrulanamadı. Ayrıntılar için details alanına bakın.',
 		invalidMessages: 'messages alanı geçerli bir mesaj listesi olmalıdır.',
 		emptyMessages: 'En az bir mesaj gönderilmelidir.',
-		tooManyMessages: 'Mesaj limiti aşıldı. Lütfen yeni bir sohbet başlatın.',
 		messageTooLong: 'Mesaj içeriği izin verilen uzunluğu aşıyor.',
 		messageEmpty: 'Mesaj içeriği boş olamaz.',
 		invalidRole: 'Mesaj rolleri yalnızca user veya assistant olabilir.',
@@ -63,9 +61,9 @@ const tr: Translations = {
 		turnstileFailed: 'Güvenlik doğrulaması başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin.',
 		turnstileTokenMissing: 'Güvenlik doğrulama anahtarı eksik.',
 		sessionInvalid: 'Oturum doğrulanamadı. Lütfen tekrar deneyin.',
-		sessionCapacityReached: 'Bu oturumun kapasitesi doldu. Lütfen yeni bir oturum başlatın.',
-		dailyCapacityReached: 'Günlük kapasite doldu. Lütfen yarın tekrar deneyin.',
-		integrityViolation: 'Sohbet geçmişi doğrulanamadı. Sohbet sıfırlanıyor.',
+		conversationFull: 'Bu konuşma uzunluk sınırına ulaştı. Yeni bir konuşma başlatarak devam edebilirsiniz.',
+		agentUnavailable: 'Ajan şu anda kullanılamıyor: günlük kapasite doldu. Yarın tekrar deneyebilirsiniz.',
+		integrityViolation: 'Sohbet geçmişi doğrulanamadı. Lütfen yeni bir sohbet başlatın.',
 		apiError: 'Yanıt üretilirken bir hata oluştu. Lütfen tekrar deneyin.',
 		emptyResponse: 'Üzgünüm, bir yanıt üretemedim. Lütfen sorunuzu farklı bir şekilde sormayı deneyin.',
 	},
@@ -77,7 +75,6 @@ const en: Translations = {
 		validationFailed: 'Request validation failed. See the details field.',
 		invalidMessages: 'The messages field must be a valid message list.',
 		emptyMessages: 'At least one message is required.',
-		tooManyMessages: 'Message limit reached. Please start a new conversation.',
 		messageTooLong: 'Message content exceeds the allowed length.',
 		messageEmpty: 'Message content cannot be empty.',
 		invalidRole: 'Message roles must be either user or assistant.',
@@ -89,9 +86,9 @@ const en: Translations = {
 		turnstileFailed: 'Security verification failed. Please refresh the page and try again.',
 		turnstileTokenMissing: 'Security verification token is missing.',
 		sessionInvalid: 'Session could not be verified. Please try again.',
-		sessionCapacityReached: "This session's capacity is used up. Please start a new session.",
-		dailyCapacityReached: 'Daily capacity reached. Please try again tomorrow.',
-		integrityViolation: 'Conversation history could not be verified. Resetting the conversation.',
+		conversationFull: 'This conversation has reached its length limit. Start a new conversation to carry on.',
+		agentUnavailable: 'The agent is unavailable right now: the daily capacity is used up. Please try again tomorrow.',
+		integrityViolation: 'The conversation history could not be verified. Please start a new chat.',
 		apiError: 'An error occurred while generating the response. Please try again.',
 		emptyResponse: "I'm sorry, I couldn't generate a response. Please try rephrasing your question.",
 	},

@@ -15,7 +15,8 @@ permissions:
   contents: read
   deployments: write
 
-# A second push while a deploy is running supersedes it rather than racing it.
+# A second push while a deploy is running waits for it instead of racing it —
+# the in-flight deploy always finishes (cancel-in-progress: false).
 concurrency:
   group: deploy-ai-worker
   cancel-in-progress: false
@@ -65,3 +66,9 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         run: npm run deploy
+
+      - name: Cleanup
+        # The runner is self-hosted, so its disk outlives the job: the deploy
+        # credentials must not stay behind between runs.
+        if: always()
+        run: rm -f .env

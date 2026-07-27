@@ -41,12 +41,13 @@ export interface ChatMessage {
 }
 
 /**
- * POST /api/v1/chat body. Unknown/legacy fields (stream, max_tokens,
- * temperature, turnstileToken) are ignored, never rejected.
+ * The validated part of a POST /api/v1/chat body. The request also carries
+ * `locale`, which is read during validation and travels separately on the
+ * result; unknown or legacy fields (stream, max_tokens, temperature,
+ * turnstileToken) are ignored rather than rejected.
  */
 export interface ChatRequest {
 	messages: ChatMessage[];
-	locale?: Locale;
 }
 
 // ============================================================================
@@ -55,7 +56,7 @@ export interface ChatRequest {
 
 /** Signed payload: `base64url(json).base64url(hmac-sha256)`. */
 export interface SessionPayload {
-	/** Session id (UUID) — rate-limit key + log correlation. */
+	/** Session id (UUID) — log correlation only. */
 	sid: string;
 	/** Issued at, Unix epoch seconds. */
 	iat: number;
@@ -80,11 +81,10 @@ export type ErrorType =
 	| 'METHOD_NOT_ALLOWED'
 	| 'TURNSTILE_FAILED'
 	| 'SESSION_INVALID'
-	| 'RATE_LIMIT_EXCEEDED'
-	| 'TOKEN_LIMIT_EXCEEDED'
+	| 'CONVERSATION_FULL'
+	| 'AGENT_UNAVAILABLE'
 	| 'INTEGRITY_VIOLATION'
-	| 'API_ERROR'
-	| 'NOT_IMPLEMENTED';
+	| 'API_ERROR';
 
 export interface ValidationDetail {
 	field: string;
@@ -135,11 +135,8 @@ export interface SseErrorEvent {
 /** https://developers.cloudflare.com/turnstile/get-started/server-side-validation/ */
 export interface TurnstileVerifyResponse {
 	'success': boolean;
-	'challenge_ts'?: string;
 	'hostname'?: string;
 	'error-codes'?: string[];
-	'action'?: string;
-	'cdata'?: string;
 }
 
 // ============================================================================
@@ -161,7 +158,6 @@ export interface ConversationBlock {
 	prev_hash: string | null;
 	block_index: number;
 	context_hash: string;
-	context: string;
 	user_message: string;
 	assistant_response: string;
 	locale: Locale;
@@ -171,8 +167,7 @@ export interface ConversationBlock {
 	tokens_in: number;
 	tokens_out: number;
 	latency_ms: number;
-	/** Always null — column kept for dashboard compatibility. */
-	tool_calls: string | null;
 	/** Unix epoch milliseconds (Date.now()). */
 	created_at: number;
 }
+
