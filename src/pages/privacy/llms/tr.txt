@@ -1,0 +1,95 @@
+> **emrearas.com — makine-okunur sayfa içeriği.**
+>
+> **TR:** Bu sayfanın MDX kaynağından otomatik üretildi. İnteraktif bileşenler
+> (diyagram, görsel, sohbet aracı) kaynak verisiyle veya kısa bir
+> direktifle değiştirildi — eksik içerik değil, veri işaretçisi olarak okuyun.
+>
+> **EN:** Auto-generated from this page's MDX source. Interactive components
+> (diagrams, figures, the chat widget) are replaced by their source
+> data or a short directive — read those as data pointers, not missing content.
+
+**path:** /privacy · **locale:** tr · **en:** https://www.emrearas.com/privacy/llms.txt?locale=en
+
+# Gizlilik Bildirimi
+
+Bu bildirim yalnızca **/ai** sayfasındaki site ajanını kapsar. Sitenin geri kalanı
+statik olarak sunulur; orada çerez, oturum veya kayıt yoktur.
+
+## Genel Bakış
+
+Site ajanına yazdığınız her soru ve aldığınız her cevap **kaydedilir**. Bu bir yan
+etki değil, tasarımın kendisidir: kayıtlar birbirine hash zinciriyle bağlanır ve
+konuşmanın sonradan değiştirilmediğini kanıtlanabilir kılar. Aynı tasarım şunu da
+açık eder: bu ajanla yaptığınız konuşmalar tarafımda okunabilir hâlde durur. Bir
+soru sormadan önce bunu bilmenizi isterim.
+
+## Mimari
+
+| Bileşen              | Nerede çalışır | Ne görür                       |
+| -------------------- | -------------- | ------------------------------ |
+| Sohbet arayüzü       | Tarayıcınız    | Yazdıklarınız, konuşma geçmişi |
+| Cloudflare Turnstile | Cloudflare     | İnsan doğrulaması              |
+| Worker               | Cloudflare     | Mesajlar, IP adresiniz         |
+| AI Gateway           | Cloudflare     | Modele giden istekler, maliyet |
+| Claude (Anthropic)   | Anthropic      | Konuşma ve site içeriği        |
+| D1 veritabanı        | Cloudflare     | Konuşma kayıtları              |
+
+## Kaydedilen Veriler
+
+Her tur için veritabanına şunlar yazılır:
+
+- **Sorunuz ve ajanın cevabı**, olduğu gibi
+- **`ip_hash`** — IP adresinizin SHA-256 özeti
+- Konuşmanın dili, kullanılan model, token sayıları, yanıt süresi, zaman damgası
+- Zincir doğrulaması için üç hash değeri
+
+### `ip_hash` Hakkında Açık Olayım
+
+IP adresiniz düz metin olarak saklanmaz, ancak saklanan özet **tuzsuz** bir
+SHA-256'dır. IPv4 adres uzayı 2³² olduğu için bu özet, veritabanına erişimi olan
+biri tarafından **geri çevrilebilir**. Bunu bir anonimleştirme olarak sunmuyorum.
+
+Bu değer benim için bir belirteçtir: bir konuşmanın farklı adreslerden sürdürülüp
+sürdürülmediğini görmemi sağlar. O an internete çıktığınız cihazı doğrudan
+tanımlayan veriyi olduğu gibi kaydetmek yerine, iyi niyetle maskelenmiş hâlini
+tutuyorum.
+
+## Kaydedilmeyenler
+
+- Çerez kullanılmaz, tarayıcınıza tanımlayıcı yazılmaz
+- Analitik, izleme pikseli veya üçüncü taraf reklam betiği yoktur
+- Hesap, e-posta veya isim istenmez
+- Ziyaretçi başına kullanım sayacı tutulmaz
+
+## Tarayıcınızda Kalanlar
+
+Konuşma geçmişiniz `localStorage`'da, yalnızca sizin cihazınızda tutulur.
+Sohbetin üst çubuğundaki **yeni konuşma** düğmesi bunu siler. Sunucudaki kayıt bu
+işlemden etkilenmez.
+
+Oturum anahtarı bellekte tutulur ve sekmeyi kapattığınızda kaybolur; hiçbir yere
+yazılmaz.
+
+## Konuşmalar Nasıl Sürdürülür
+
+Sürekliliği IP adresiniz veya bir çerez değil, konuşmanın kendisinin hash'i
+belirler. Bu yüzden ağ değiştirdiğinizde konuşma kesilmez.
+
+## Üçüncü Taraflar
+
+| Hizmet     | Rolü                                           | Gizlilik politikası                                                       |
+| ---------- | ---------------------------------------------- | ------------------------------------------------------------------------- |
+| Cloudflare | Barındırma, Turnstile, Workers, D1, AI Gateway | [cloudflare.com/privacypolicy](https://www.cloudflare.com/privacypolicy/) |
+| Anthropic  | Modeli çalıştırır                              | [anthropic.com/legal/privacy](https://www.anthropic.com/legal/privacy)    |
+
+## Açık Kaynak
+
+Bu sayfanın anlattığı her şey denetlenebilir: kaynak kodda görünen yapı, canlı
+üretim ortamında çalışanın kendisidir.
+
+[github.com/ARAS-Workspace/emrearascom-www](https://github.com/ARAS-Workspace/emrearascom-www)
+
+## İletişim
+
+Kayıtlarınızın silinmesini isterseniz veya sorularınız varsa:
+[r.emrearas@proton.me](mailto:r.emrearas@proton.me)

@@ -19,6 +19,7 @@ const BlogPostPage = lazy(() => import('@pages/blog/post'));
 // The chat component, mounted from an MDX body so the llms pipeline picks the
 // page up out of `src/pages/ai/` the same way it picks up a post.
 const AIPage = lazy(() => import('@pages/ai'));
+const PrivacyPage = lazy(() => import('@pages/privacy'));
 
 // ── Router ────────────────────────────────────────────────────────
 const router = createBrowserRouter([
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: 'ai',
         element: <AIPage />,
+      },
+      {
+        path: 'privacy',
+        element: <PrivacyPage />,
       },
     ],
   },

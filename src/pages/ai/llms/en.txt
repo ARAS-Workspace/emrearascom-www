@@ -13,3 +13,18 @@
 # AI
 
 > [AIChatAssistant] Interactive chat with the site agent — a Claude-backed assistant grounded in this site's content. Available on the live page at /ai.
+
+## References
+
+| Source                        | Address                                                                                                                    |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Organisation (ARAS-Workspace) | [github.com/ARAS-Workspace](https://github.com/ARAS-Workspace)                                                             |
+| Repository (emrearascom-www)  | [github.com/ARAS-Workspace/emrearascom-www](https://github.com/ARAS-Workspace/emrearascom-www)                             |
+| Worker                        | [workers/ai-worker](https://github.com/ARAS-Workspace/emrearascom-www/tree/main/workers/ai-worker)                         |
+| React Interface Component     | [src/shared/components/ai-chat](https://github.com/ARAS-Workspace/emrearascom-www/tree/main/src/shared/components/ai-chat) |
+
+## Privacy
+
+Your exchanges with the agent are recorded so that its performance can be
+measured and its output observed. This is explained in detail on the
+[Privacy Notice](/privacy) page.

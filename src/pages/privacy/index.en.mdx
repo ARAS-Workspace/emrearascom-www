@@ -1,0 +1,86 @@
+# Privacy Notice
+
+This notice covers the site agent on **/ai** only. The rest of the site is served
+as static files: no cookies, no session, no record.
+
+## Overview
+
+Every question you put to the agent and every answer it gives is **recorded**.
+That is not a side effect but the design: the records are linked to one another
+by a hash chain, which is what makes a conversation provably unaltered
+afterwards. The same design makes something else plain: the conversations you
+have with this agent sit in readable form on my side. I would rather you knew
+that before you asked anything.
+
+## Architecture
+
+| Component            | Runs on      | What it sees                          |
+|----------------------|--------------|---------------------------------------|
+| Chat interface       | Your browser | What you type, the conversation history |
+| Cloudflare Turnstile | Cloudflare   | Human verification                    |
+| Worker               | Cloudflare   | Messages, your IP address             |
+| AI Gateway           | Cloudflare   | Requests to the model, cost           |
+| Claude (Anthropic)   | Anthropic    | The conversation and the site content |
+| D1 database          | Cloudflare   | Conversation records                  |
+
+## What Is Recorded
+
+For every turn, the database receives:
+
+- **Your question and the agent's answer**, verbatim
+- **`ip_hash`** — a SHA-256 digest of your IP address
+- The conversation's language, the model used, token counts, latency, timestamp
+- Three hash values, for verifying the chain
+
+### Let Me Be Plain About `ip_hash`
+
+Your IP address is not stored in the clear, but the digest that is stored is an
+**unsalted** SHA-256. The IPv4 address space is 2³², so that digest is
+**reversible** by anyone with access to the database. I do not present it as
+anonymisation.
+
+To me the value is a marker: it lets me see whether a conversation was continued
+from more than one address. Rather than recording the data that directly
+identifies the device you came online from at that moment, I keep it in a form
+masked in good faith.
+
+## What Is Not Recorded
+
+- No cookies, and no identifier written to your browser
+- No analytics, tracking pixels or third-party advertising scripts
+- No account, email address or name is asked for
+- No per-visitor usage counter is kept
+
+## What Stays In Your Browser
+
+Your conversation history is held in `localStorage`, on your device only. The
+**new conversation** button in the chat header clears it. The record on the
+server is not affected by that.
+
+The session key is held in memory and is lost when you close the tab; it is never
+written anywhere.
+
+## How Conversations Continue
+
+Continuity is decided by a hash of the conversation itself, not by your IP
+address and not by a cookie. That is why changing network does not interrupt a
+conversation.
+
+## Third Parties
+
+| Service    | Role                                          | Privacy policy                                                            |
+|------------|-----------------------------------------------|---------------------------------------------------------------------------|
+| Cloudflare | Hosting, Turnstile, Workers, D1, AI Gateway   | [cloudflare.com/privacypolicy](https://www.cloudflare.com/privacypolicy/) |
+| Anthropic  | Runs the model                                | [anthropic.com/legal/privacy](https://www.anthropic.com/legal/privacy)    |
+
+## Open Source
+
+Everything this page describes can be checked: the structure visible in the
+source is the one running in production.
+
+[github.com/ARAS-Workspace/emrearascom-www](https://github.com/ARAS-Workspace/emrearascom-www)
+
+## Contact
+
+To ask for your records to be deleted, or with any question:
+[r.emrearas@proton.me](mailto:r.emrearas@proton.me)
