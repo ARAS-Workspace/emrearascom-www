@@ -8,6 +8,8 @@
 > (diagrams, figures, the chat widget) are replaced by their source
 > data or a short directive — read those as data pointers, not missing content.
 
-**path:** {{path}} · **locale:** {{locale}} · **{{alt_locale}}:** {{alt_url}}
+**path:** /ai · **locale:** tr · **en:** https://www.emrearas.com/ai/llms.txt?locale=en
 
-{{content}}
+# AI
+
+> [AIChatAssistant] Site ajanıyla etkileşimli sohbet — sitenin içeriğiyle beslenen Claude tabanlı bir asistan. Canlı sayfada /ai adresinde kullanılabilir.

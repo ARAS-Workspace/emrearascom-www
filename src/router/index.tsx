@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import BlogLayout from '@shared/components/layout/BlogLayout';
+import MainLayout from '@shared/components/layout/MainLayout';
 import ErrorPage from '@shared/pages/error/ErrorPage';
 import LoadingSpinner from '@shared/components/ui/LoadingSpinner';
 
@@ -15,11 +15,16 @@ const HomePage = lazy(() => import('@pages/home'));
 const BlogIndexPage = lazy(() => import('@pages/blog/index'));
 const BlogPostPage = lazy(() => import('@pages/blog/post'));
 
+// ── AI ────────────────────────────────────────────────────────────
+// The chat component, mounted from an MDX body so the llms pipeline picks the
+// page up out of `src/pages/ai/` the same way it picks up a post.
+const AIPage = lazy(() => import('@pages/ai'));
+
 // ── Router ────────────────────────────────────────────────────────
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <BlogLayout />,
+    element: <MainLayout />,
     errorElement: <ErrorPage />,
     children: [
       {
@@ -33,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: 'blog/:slug',
         element: <BlogPostPage />,
+      },
+      {
+        path: 'ai',
+        element: <AIPage />,
       },
     ],
   },

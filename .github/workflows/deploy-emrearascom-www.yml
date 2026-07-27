@@ -15,6 +15,13 @@ permissions:
   contents: read
   deployments: write
 
+# Two overlapping runs would each end in `wrangler pages deploy` against the
+# same project, and the one that finishes last wins — which may be the older
+# build. A second push waits instead; the in-flight deploy always completes.
+concurrency:
+  group: deploy-emrearascom-www
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Build and Deploy
@@ -44,6 +51,38 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID=${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           EOF
 
+      - name: Create .env.production
+        # Vite inlines these at build time. Both are public client-side config
+        # (the worker's URL and the Turnstile *site* key, not its secret), so
+        # they are repository variables rather than secrets. The dev endpoint
+        # is deliberately absent: a production build never reads it.
+        #
+        # An unset variable would expand to an empty string and still build —
+        # the page would just ship its "agent unavailable" notice — so the
+        # values are checked rather than trusted. Cloudflare's test site keys
+        # are checked for too: they are non-empty and pass every challenge, so
+        # they would deploy a bot gate that stops nobody.
+        env:
+          VITE_AI_WORKER_PRODUCTION_ENDPOINT: ${{ vars.VITE_AI_WORKER_PRODUCTION_ENDPOINT }}
+          VITE_AI_WORKER_TURNSTILE_SITE_KEY: ${{ vars.VITE_AI_WORKER_TURNSTILE_SITE_KEY }}
+        run: |
+          for name in VITE_AI_WORKER_PRODUCTION_ENDPOINT VITE_AI_WORKER_TURNSTILE_SITE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository variable $name is not set — the /ai page would deploy unconfigured."
+              exit 1
+            fi
+          done
+          case "$VITE_AI_WORKER_TURNSTILE_SITE_KEY" in
+            [123]x00000000000000000000*)
+              echo "::error::VITE_AI_WORKER_TURNSTILE_SITE_KEY is a Cloudflare test key — set the real site key for www.emrearas.com."
+              exit 1
+              ;;
+          esac
+          cat > .env.production << EOF
+          VITE_AI_WORKER_PRODUCTION_ENDPOINT=$VITE_AI_WORKER_PRODUCTION_ENDPOINT
+          VITE_AI_WORKER_TURNSTILE_SITE_KEY=$VITE_AI_WORKER_TURNSTILE_SITE_KEY
+          EOF
+
       - name: Install dependencies
         run: npm ci
 
@@ -52,12 +91,17 @@ jobs:
         # on the generator being installed. This step regenerates them and fails
         # if the result differs — i.e. if MDX changed without regenerating.
         # The hand-written CV text is untouched (home has no MDX source).
+        #
+        # `git status --porcelain`, not `git diff`: a new page's llms files are
+        # untracked, and `git diff` reports nothing at all for a path that was
+        # never added — the check would pass while the page ships no llms.txt.
         run: |
           npm --prefix tools/agentic-data-builder ci
           node scripts/generate-llms.js
-          if ! git diff --quiet -- ':(glob)src/pages/**/llms/*.txt'; then
+          drift="$(git status --porcelain -- ':(glob)src/pages/**/llms/*.txt')"
+          if [ -n "$drift" ]; then
             echo "::error::llms.txt is out of date — run 'npm run generate-llms' and commit the result."
-            git diff --stat -- ':(glob)src/pages/**/llms/*.txt'
+            echo "$drift"
             exit 1
           fi
 

@@ -10,22 +10,29 @@ const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 
 export const LocaleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [locale, setLocale] = useState<Locale>(() => {
+    // `Object.hasOwn`, not `in`: every candidate below is attacker-supplied, and
+    // `in` walks the prototype chain — `?locale=constructor` would be accepted
+    // as a locale, `translate` would hand back `Object` instead of a bundle
+    // (truthy, so its own fallback never fires) and the first string lookup
+    // would take the page down.
+    const isKnownLocale = (value: string): boolean => Object.hasOwn(translations, value);
+
     try {
       // 1. URL parameter (pre-rendering control)
       const urlLocale = new URLSearchParams(window.location.search).get('locale');
-      if (urlLocale && urlLocale in translations) return urlLocale as Locale;
+      if (urlLocale && isKnownLocale(urlLocale)) return urlLocale as Locale;
 
       // 2. Cookie (user explicit choice - persistent)
       const cookieLocale = document.cookie.match(/preferred_locale=(\w+)/)?.[1];
-      if (cookieLocale && cookieLocale in translations) return cookieLocale as Locale;
+      if (cookieLocale && isKnownLocale(cookieLocale)) return cookieLocale as Locale;
 
       // 3. HTML lang attribute (server/worker decision)
       const htmlLang = document.documentElement.getAttribute('lang');
-      if (htmlLang && htmlLang in translations) return htmlLang as Locale;
+      if (htmlLang && isKnownLocale(htmlLang)) return htmlLang as Locale;
 
       // 4. Browser language fallback
       const browserLang = navigator.language.split('-')[0];
-      if (browserLang in translations) return browserLang as Locale;
+      if (isKnownLocale(browserLang)) return browserLang as Locale;
 
       // 5. Default
       return DEFAULT_LOCALE;

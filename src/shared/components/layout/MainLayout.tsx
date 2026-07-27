@@ -32,10 +32,10 @@ import { Asleep, Light, RotateClockwise } from '@carbon/icons-react';
 import { useTheme } from '@shared/hooks/useTheme';
 import { useLocale } from '@shared/hooks/useLocale';
 import { translate } from '@shared/translations';
+import { getNavItems } from '@shared/content/nav';
 import FlagIcon from '@shared/components/ui/FlagIcon';
 import Footer from './Footer';
 
-import './styles/BlogLayout.scss';
 import '../ui/styles/ThemeSwitcher.scss';
 
 interface RenderProps {
@@ -43,17 +43,14 @@ interface RenderProps {
   onClickSideNavExpand: () => void;
 }
 
-const BlogLayout: React.FC = () => {
+const MainLayout: React.FC = () => {
   const { theme, toggleTheme, isThemeTransitioning } = useTheme();
   const { locale, changeLocale } = useLocale();
   const location = useLocation();
   const navigate = useNavigate();
   const t = translate(locale);
 
-  const navItems = [
-    { label: t.nav.home, href: '/' },
-    { label: t.nav.blog, href: '/blog' },
-  ];
+  const navItems = getNavItems(locale);
 
   // Normalize trailing slash for consistent comparison.
   const normalizedPath = location.pathname.replace(/\/$/, '') || '/';
@@ -153,7 +150,7 @@ const BlogLayout: React.FC = () => {
             </SideNav>
           </Header>
 
-          <Content id="main-content" className="blog-shell">
+          <Content id="main-content">
             <Outlet />
           </Content>
 
@@ -164,4 +161,4 @@ const BlogLayout: React.FC = () => {
   );
 };
 
-export default BlogLayout;
+export default MainLayout;

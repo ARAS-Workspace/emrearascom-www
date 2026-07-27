@@ -8,6 +8,8 @@
 > (diyagram, görsel, sohbet aracı) kaynak verisiyle veya kısa bir
 > direktifle değiştirildi — eksik içerik değil, veri işaretçisi olarak okuyun.
 
-**path:** {{path}} · **locale:** {{locale}} · **{{alt_locale}}:** {{alt_url}}
+**path:** /ai · **locale:** en · **tr:** https://www.emrearas.com/ai/llms.txt?locale=tr
 
-{{content}}
+# AI
+
+> [AIChatAssistant] Interactive chat with the site agent — a Claude-backed assistant grounded in this site's content. Available on the live page at /ai.

@@ -55,8 +55,9 @@ function expandContentRoute(rawRoute, componentDir) {
  * Parse src/router/index.tsx and build a route → absolute page-directory map.
  *
  * The router is the single authority for route ↔ page directory. Only lazy
- * page components are mapped; the BlogLayout wrapper is skipped (it never
- * carries a `@pages`/`@shared` import).
+ * page components are mapped; statically imported wrappers like MainLayout are
+ * skipped, because pass 1 records only `const X = lazy(() => import('…'))`
+ * declarators.
  *
  * Import → directory resolution (every page is a bare directory import
  * resolved via its own index.tsx):
@@ -79,10 +80,11 @@ function expandContentRoute(rawRoute, componentDir) {
  * A content directory counts only when it holds a `meta.json`, so scaffolding
  * (`_template/`, which lives outside `posts/` anyway) and stray folders never
  * become routes. Expansion has to happen HERE rather than in build_routes.js
- * because three consumers share this map — routes.yaml (prerender),
- * generate-llms.js and build-llms.js — and all three need the concrete
- * per-post routes and directories. Stripping the segment instead would also
- * collapse `/blog/:slug` onto `/blog` and clobber the index route.
+ * because four consumers share this map — routes.yaml (prerender),
+ * generate-llms.js, build-llms.js and the agentic-data-builder's coordinate
+ * resolver, which imports this file dynamically — and all four need the
+ * concrete per-post routes and directories. Stripping the segment instead
+ * would also collapse `/blog/:slug` onto `/blog` and clobber the index route.
  *
  * @param {string} routerPath  Absolute path to src/router/index.tsx.
  * @param {string} srcRoot     Absolute path to src/ — `@pages` resolves to

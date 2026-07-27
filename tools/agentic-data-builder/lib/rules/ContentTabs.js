@@ -29,8 +29,7 @@
 // transform context (context.resolve), which reads + transforms the imported
 // MDX file relative to the source page. Tabs whose content is a plain React
 // component (not MDX) fall through to context.dispatch, which renders the
-// identifier via its registered rule (e.g. the survey and statistics
-// directives) instead of losing the tab.
+// identifier via its registered rule instead of losing the tab.
 
 /** @typedef {import('../types.js').MdxProps} MdxProps */
 

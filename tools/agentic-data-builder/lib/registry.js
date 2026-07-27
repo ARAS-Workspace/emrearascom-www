@@ -31,15 +31,18 @@ import { rule as InlineNotification } from './rules/InlineNotification.js';
 import { rule as Link } from './rules/Link.js';
 import { rule as Button } from './rules/Button.js';
 import { rule as CarbonIcons } from './rules/CarbonIcons.js';
+import { rule as AIChatAssistant } from './rules/AIChatAssistant.js';
 
 /**
  * Component tag → rule. This is the whole extension surface: to teach the
- * builder about a component, add a rule module and one entry here. Pruned to
- * the six generic rules that ship with emrearas.com's MDX component set.
+ * builder about a component, add a rule module and one entry here. The site's
+ * own MDX currently reaches only Mermaid and AIChatAssistant; the rest are
+ * generic rules kept for MDX that has not been written yet.
  * @type {Record<string, import('./types.js').RuleFn>}
  */
 const REGISTRY = {
   Mermaid,
+  AIChatAssistant,
   ContentTabs,
   InlineNotification,
   // emrearas.com wraps Carbon's InlineNotification; the props contract (kind/title/
