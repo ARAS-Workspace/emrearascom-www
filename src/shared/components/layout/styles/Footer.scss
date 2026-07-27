@@ -24,16 +24,6 @@
   align-items: center;
 }
 
-.footer-logo-column {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  @include bp.breakpoint-down(md) {
-    margin-bottom: spacing.$spacing-05;
-  }
-}
-
 .footer-content-column {
   display: flex;
   flex-direction: column;
@@ -50,23 +40,26 @@
   margin: 0 0 spacing.$spacing-02 0;
 }
 
-.footer-trademark {
-  @include type.type-style('helper-text-01');
-  color: var(--cds-text-disabled);
-  margin: 0 0 spacing.$spacing-02 0;
-  line-height: 1.5;
-}
+.footer-privacy-link {
+  @include type.type-style('label-01');
+  color: var(--cds-link-primary);
+  text-decoration: none;
 
-.footer-trademark-notice {
-  @include type.type-style('helper-text-01');
-  color: var(--cds-text-disabled);
-  margin: 0 0 spacing.$spacing-02 0;
-  line-height: 1.5;
-}
+  // The column is a flex container, so a link left to itself stretches the full
+  // width of the footer and takes every click that lands on that row with it.
+  align-self: flex-start;
 
-.footer-copyright-additional {
-  @include type.type-style('helper-text-01');
-  color: var(--cds-text-disabled);
-  margin: 0;
-  line-height: 1.5;
+  @include bp.breakpoint-down(md) {
+    align-self: center;
+  }
+
+  &:hover {
+    color: var(--cds-link-primary-hover);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--cds-focus);
+    outline-offset: 2px;
+  }
 }

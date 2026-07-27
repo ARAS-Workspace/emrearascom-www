@@ -34,7 +34,8 @@
   "footer": {
     "copyright": {
       "text": "© 2026 Rıza Emre ARAS — All rights reserved."
-    }
+    },
+    "privacy": "AI Privacy Notice"
   },
   "errorPages": {
     "notFound": {
