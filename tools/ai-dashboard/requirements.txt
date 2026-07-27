@@ -1,0 +1,11 @@
+# Site agent dashboard — local only.
+#
+# No web framework and no database driver: Streamlit renders the interface and
+# D1 is read over its HTTP API, so `requests` is the whole data layer. Hash
+# verification uses hashlib and unicodedata from the standard library, which is
+# deliberate — the check should not depend on a package that could change what
+# it computes.
+
+streamlit>=1.52.0
+python-dotenv>=1.2.0
+requests>=2.32.0

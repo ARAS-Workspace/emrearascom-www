@@ -1,0 +1,23 @@
+# Streamlit reads this from the directory it is RUN from, not the one the script
+# lives in. It belongs beside `app/`, and the README's command has to be run from
+# here or none of it applies — which is silent, because a config that is never
+# found produces no warning.
+
+[browser]
+gatherUsageStats = false
+
+[server]
+# Loopback only. Left at Streamlit's default the app binds every interface and
+# the startup banner prints the public address; this reads the production
+# conversation record, so it has no business being reachable from anywhere but
+# this machine. It restricts nothing in the interface.
+address = "localhost"
+
+# There is deliberately no [theme] block.
+#
+# Streamlit 1.60 puts the light/dark switch in the toolbar menu, and hides that
+# switch as soon as an app pins any theme value here — one `primaryColor` line
+# was enough to remove it. Leaving the section out is what keeps System / Light
+# / Dark available to whoever is reading, and it is also what lets the inlined
+# signature in the sidebar re-ink itself: it paints in `currentColor` and takes
+# whatever text colour the active theme supplies.

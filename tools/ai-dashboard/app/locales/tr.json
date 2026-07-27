@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "Site Ajanı — Konuşma Kayıtları",
+    "language": "Arayüz Dili"
+  },
+  "setup": {
+    "missing": "`.env` eksik: {names}",
+    "hint": "`.env.example` dosyasını `.env` olarak kopyalayıp Cloudflare bilgilerini doldurun.",
+    "failed": "Veritabanına ulaşılamadı"
+  },
+  "overview": {
+    "turns": "Tur",
+    "conversations": "Konuşma",
+    "tokensIn": "Girdi Token",
+    "tokensOut": "Çıktı Token",
+    "span": "Kayıt Aralığı",
+    "empty": "Henüz kayıt yok."
+  },
+  "conversation": {
+    "turns": "tur",
+    "turnsLabel": "Tur",
+    "model": "Model",
+    "branches": "Bu konuşma {count} dala ayrılmış",
+    "branchesHint": "Aynı konuşma iki yerden sürdürülünce zincir çatallanır. Her dal kendi içinde geçerlidir; aşağıda ayrı ayrı okunur.",
+    "branch": "Dal",
+    "incomplete": "Bu dal başlangıca kadar izlenemedi",
+    "input": "Girdi Token",
+    "output": "Çıktı Token",
+    "time": "Süre",
+    "ipHash": "IP Hash",
+    "locale": "Dil",
+    "block": "Blok",
+    "at": "Tarih"
+  },
+  "integrity": {
+    "title": "Bütünlük",
+    "verified": "Doğrulandı — {count} turun tamamı saklanan hash'leri yeniden üretiyor",
+    "broken": "{count} tur doğrulanamadı",
+    "linksBroken": "Bloklar arası bağ kopuk",
+    "blockHash": "Blok Hash",
+    "contextHash": "Bağlam Hash",
+    "stored": "saklanan",
+    "computed": "hesaplanan",
+    "explain": "Her satırın metni yeniden hash'lenip yanındaki değerle karşılaştırılır."
+  },
+  "export": {
+    "markdown": "Markdown İndir",
+    "json": "JSON İndir"
+  },
+  "sessions": {
+    "title": "Oturumlar",
+    "count": "oturum"
+  },
+  "footer": {
+    "copyright": "Rıza Emre ARAS"
+  }
+}
