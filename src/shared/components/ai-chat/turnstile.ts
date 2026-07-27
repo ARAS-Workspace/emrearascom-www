@@ -72,16 +72,18 @@ export function loadTurnstile(onReady: () => void, onFailure: () => void): () =>
   const timeout = window.setTimeout(() => {
     if (!window.turnstile) onFailure();
   }, LOAD_TIMEOUT_MS);
-  window.onTurnstileLoadCallback = () => {
+  const installed = (): void => {
     window.clearTimeout(timeout);
     onReady();
   };
+  window.onTurnstileLoadCallback = installed;
 
   const dispose = (): void => {
     window.clearTimeout(timeout);
-    // Only give up the callback if it is still the one installed here; a later
-    // caller may already have replaced it.
-    if (window.onTurnstileLoadCallback) window.onTurnstileLoadCallback = undefined;
+    // Compared by identity, not by presence: a later caller may already have
+    // replaced the callback, and clearing whatever happens to be installed
+    // would leave that caller waiting for a script event that never reaches it.
+    if (window.onTurnstileLoadCallback === installed) window.onTurnstileLoadCallback = undefined;
   };
 
   const existing = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]');

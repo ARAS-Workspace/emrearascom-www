@@ -43,8 +43,8 @@ import './styles/AIChatAssistant.scss';
  * 2. **Byte-exact history.** The worker hash-chains every turn, so the
  *    assistant text stored locally must equal the concatenation of the
  *    streamed deltas exactly. A turn is stored only once it completes, and an
- *    interrupted one enters neither the local transcript nor the chain — the
- *    tokens it did spend are still counted, on the worker's daily meter.
+ *    interrupted one enters neither the local transcript nor the chain — what
+ *    it did spend is still recorded, by the gateway the worker calls through.
  * 3. **Client-only.** Carbon AI Chat has no SSR path, so the whole thing sits
  *    behind `useIsClient` with a skeleton in the prerendered HTML.
  */
@@ -53,11 +53,13 @@ import './styles/AIChatAssistant.scss';
  * The part of the worker's error envelope this client reads.
  *
  * Three refusals are states rather than failures — the history no longer
- * verifies, the conversation is full, or the agent is out of capacity for the
- * day — and they are told apart by `type`, not by status. `details` carries the
+ * verifies, the conversation is full, or the agent has no capacity left — and
+ * they are told apart by `type`, not by status. A refusal can arrive either as
+ * a status or, once the worker has opened the stream, as an `error` event
+ * inside it; both are read the same way. `details` carries the
  * per-field reason for a validation refusal, which is what the visitor is shown
- * for those; the envelope's own message only points at the list. `status` and
- * `retryAfter` are carried for other clients and rendered by none.
+ * for those; the envelope's own message only points at the list. `status` is
+ * carried for other clients and rendered by none.
  */
 interface WorkerErrorBody {
   error?: {
@@ -112,6 +114,15 @@ const TURKISH_STRINGS: DeepPartial<LanguagePack> = {
  */
 let conversationHalted = false;
 
+/**
+ * Refusals that end the conversation rather than inviting another attempt: the
+ * history no longer verifies, the conversation reached its length, or the agent
+ * has no capacity. They arrive either as a status or, when the worker has
+ * already opened the stream, as an `error` event inside it — so both paths test
+ * against this list.
+ */
+const HALTING_ERRORS = ['INTEGRITY_VIOLATION', 'CONVERSATION_FULL', 'AGENT_UNAVAILABLE'];
+
 const AIChatAssistant: React.FC = () => {
   const isClient = useIsClient();
   const { locale } = useLocale();
@@ -127,8 +138,8 @@ const AIChatAssistant: React.FC = () => {
   const [sessionToken, setSessionToken] = useState<string | null>(() => readSession());
   const [gateError, setGateError] = useState<string | null>(null);
   // Set when the worker refuses on a state rather than a fault: the history no
-  // longer verifies, the conversation is full, or the agent has spent the day's
-  // capacity. The transcript stays readable and the composer closes.
+  // longer verifies, the conversation is full, or the agent has no capacity
+  // left. The transcript stays readable and the composer closes.
   const [halted, setHaltedState] = useState(() => conversationHalted);
   const setHalted = useCallback((value: boolean): void => {
     conversationHalted = value;
@@ -283,13 +294,19 @@ const AIChatAssistant: React.FC = () => {
     return () => window.clearTimeout(timer);
   }, [sessionToken, endSession, t.aiChat.errors.sessionExpired]);
 
-  useEffect(
-    () => () => {
+  // The flag is raised in the effect body, not left to the initial ref value.
+  // React runs setup, cleanup, then setup again on mount in development, so a
+  // ref only ever lowered would stay lowered for the rest of the component's
+  // life — and every completed turn would be discarded below as one that
+  // arrived after the widget went away, which is exactly what stopped
+  // development builds from persisting anything at all.
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
       mounted.current = false;
       turnAbort.current?.abort();
-    },
-    []
-  );
+    };
+  }, []);
 
   /**
    * Restore the transcript Carbon should show when the chat mounts.
@@ -316,8 +333,8 @@ const AIChatAssistant: React.FC = () => {
         type: BusEventType.PRE_RESTART_CONVERSATION,
         handler: () => {
           clearHistory();
-          // A full conversation is fixed by starting another one; if the day's
-          // capacity is what ran out, the next message simply halts again.
+          // A full conversation is fixed by starting another one; if capacity
+          // is what ran out, the next message simply halts again.
           setHalted(false);
         },
       });
@@ -401,7 +418,12 @@ const AIChatAssistant: React.FC = () => {
       };
 
       try {
-        const response = await fetch(`${AI_WORKER_ENDPOINT}${AI_WORKER_ROUTES.chat}`, {
+        // The locale rides on the query string as well as in the body. The
+        // worker refuses an over-length conversation before it reads the body,
+        // and that refusal is shown to the visitor, so it needs a locale it can
+        // read first.
+        const chatUrl = `${AI_WORKER_ENDPOINT}${AI_WORKER_ROUTES.chat}?locale=${localeRef.current}`;
+        const response = await fetch(chatUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ messages, locale: localeRef.current }),
@@ -418,12 +440,11 @@ const AIChatAssistant: React.FC = () => {
           }
           // Three refusals are states, not faults: this conversation cannot be
           // continued (its history no longer verifies, or it reached its
-          // length), or the agent has spent the day's capacity. None of them is
+          // length), or the agent has no capacity left. None of them is
           // worth retrying, so the composer closes and the message says why.
           // Nothing is erased here — clearing a conversation is the visitor's
           // to do, through "New conversation" in the header.
-          const halting = ['INTEGRITY_VIOLATION', 'CONVERSATION_FULL', 'AGENT_UNAVAILABLE'];
-          if (body.error?.type !== undefined && halting.includes(body.error.type)) {
+          if (body.error?.type !== undefined && HALTING_ERRORS.includes(body.error.type)) {
             await fail(body.error.message ?? t.aiChat.errors.generic);
             setHalted(true);
             return;
@@ -442,6 +463,7 @@ const AIChatAssistant: React.FC = () => {
         const decoder = new TextDecoder();
         let buffer = '';
         let streamError: string | null = null;
+        let streamHalts = false;
         // The worker emits `done` only after the turn has been written to its
         // integrity chain. Transport EOF proves nothing on its own, so this is
         // what separates a finished turn from a connection that simply ended.
@@ -475,22 +497,31 @@ const AIChatAssistant: React.FC = () => {
                   text,
                   // `cancellable` is what puts the stop button on screen. The
                   // worker treats the disconnect correctly — the turn never
-                  // enters the chain, and whatever the model reported before the
-                  // cut is already on the day's meter — so there is nothing to
-                  // undo on this side either.
+                  // enters the chain, and what it cost is recorded by the
+                  // gateway either way — so there is nothing to undo on this
+                  // side either.
                   streaming_metadata: { id: itemId, cancellable: true },
                 },
               });
             } else if (event === 'done') {
               completed = true;
             } else if (event === 'error') {
-              streamError = (data as WorkerErrorBody).error?.message ?? t.aiChat.errors.generic;
+              // A refusal can arrive here rather than as a status: the worker
+              // opens the SSE response before it calls the model, so anything
+              // the model or the gateway in front of it refuses is reported
+              // inside the stream. The type is read for the same reason it is
+              // read from a status response — it is what separates a refusal
+              // worth retrying from one that ends the conversation.
+              const body = data as WorkerErrorBody;
+              streamError = body.error?.message ?? t.aiChat.errors.generic;
+              streamHalts = body.error?.type !== undefined && HALTING_ERRORS.includes(body.error.type);
             }
           }
         }
 
         if (streamError !== null) {
           await fail(streamError);
+          if (streamHalts) setHalted(true);
           return;
         }
 
@@ -535,8 +566,12 @@ const AIChatAssistant: React.FC = () => {
         // Persist only after a complete answer, and exactly as streamed — and
         // only while this instance is still the one on screen. A turn that
         // finishes after the component went away would write over what its
-        // replacement has already read.
-        if (!mounted.current) return;
+        // replacement has already read. The abort check covers the narrower
+        // case of "New conversation" landing while these last chunks are being
+        // drawn: Carbon clears the stored copies from its restart handler and
+        // then cancels this turn, so writing here would put the turn the
+        // visitor just discarded back into storage they believe is empty.
+        if (!mounted.current || turn.signal.aborted) return;
 
         addTurn(
           [

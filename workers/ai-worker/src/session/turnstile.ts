@@ -24,6 +24,15 @@ import type { Env, TurnstileVerifyResponse } from '../types';
 
 const SITEVERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
+/**
+ * How long siteverify may take before the challenge is treated as unverified.
+ * Bounded for the same reason the llms-full fetch is: this call decides whether
+ * a session is issued at all, so a request that hangs leaves the visitor
+ * watching a solved challenge that never opens the chat. Failing fast turns
+ * that into the 403 the caller already handles, and the visitor can retry.
+ */
+const SITEVERIFY_TIMEOUT_MS = 5_000;
+
 export interface TurnstileVerdict {
 	ok: boolean;
 	errorCodes: string[];
@@ -42,6 +51,7 @@ export async function verifyTurnstileToken(env: Env, token: string, remoteIp: st
 				response: token,
 				remoteip: remoteIp,
 			}),
+			signal: AbortSignal.timeout(SITEVERIFY_TIMEOUT_MS),
 		});
 
 		const data = (await response.json()) as TurnstileVerifyResponse;

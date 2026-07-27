@@ -96,9 +96,18 @@ const isHistoryItem = (item: unknown): boolean => {
  * transcript is much the larger of the two: quota runs out on that one first.
  * Leaving the smaller one behind would persist a conversation whose visible
  * half is a turn shorter than the half the worker is shown, and the gap would
- * widen with every later turn. Dropping both is the choice the loader already
- * makes when it finds them inconsistent — the session itself carries on from
- * the refs, it simply will not survive a reload.
+ * widen with every later turn. Dropping both is the safe outcome — the session
+ * itself carries on from the refs, it simply will not survive a reload.
+ *
+ * The loader does not catch a half-write on its own: it checks each key's shape
+ * independently and starts clean when either is unreadable, but two well-formed
+ * arrays of different lengths look valid to it. Keeping the pair honest is this
+ * function's job, not the loader's.
+ *
+ * Both copies are rewritten in full from this tab's refs, so a second tab is
+ * outside what this can hold together: starting a new conversation in one tab
+ * is undone by the next turn completing in the other. The widget is built for
+ * one tab at a time.
  */
 function writePair(context: ApiMessage[], items: HistoryItem[]): void {
   try {
@@ -156,7 +165,8 @@ export const usePersistedChatHistory = (): UsePersistedChatHistoryReturn => {
 
   const addTurn = useCallback((items: HistoryItem[], messages: ApiMessage[]): void => {
     // Neither copy needs a cap of its own: the worker refuses a conversation
-    // past its message limit, and that limit is what ends it.
+    // once the replayed context passes the size it accepts, and that refusal is
+    // what ends it.
     apiContext.current = [...apiContext.current, ...messages];
     historyItems.current = [...historyItems.current, ...items];
     writePair(apiContext.current, historyItems.current);

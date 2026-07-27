@@ -26,10 +26,22 @@ export const CONFIG = {
 		model: 'claude-haiku-4-5',
 
 		/**
-		 * Maximum tokens per completion (server-fixed; not client-controllable)
+		 * Maximum tokens per completion (server-fixed; not client-controllable).
+		 *
+		 * This is the only thing bounding an assistant message, and it trades
+		 * directly against conversation length: the answer is replayed on every
+		 * later turn, so it is the growth rate of the body that
+		 * `maxRequestBodySize` ends the conversation on. Measured here, a token of
+		 * answer runs about 5 bytes in English and 2.8 in Turkish, which puts this
+		 * value at roughly 10 KB an answer and a 256 KB conversation at around 18
+		 * exchanges.
+		 *
+		 * Reaching it truncates the answer with nothing said, so it wants to sit
+		 * above what the agent actually needs: real answers have measured 450
+		 * tokens, and only a request for maximum detail approached 1024.
 		 * @example max_tokens: CONFIG.claude.maxTokens
 		 */
-		maxTokens: 4096,
+		maxTokens: 2048,
 	},
 
 	/**
@@ -77,44 +89,47 @@ export const CONFIG = {
 	 */
 	validation: {
 		/**
-		 * Longest a single message may be, in bytes.
+		 * Longest a single VISITOR message may be, in bytes.
+		 *
+		 * Assistant messages are exempt: they are this worker's own output
+		 * replayed back, already bounded at generation by `claude.maxTokens`.
+		 * Applying this cap to them made an ordinary English answer refuse the
+		 * following request, over a message the visitor never wrote.
 		 *
 		 * Bytes rather than characters so it can be reasoned about against the
-		 * body cap, which is also bytes: a full conversation of this length must
-		 * still fit inside it, so that a conversation ends by reaching its
-		 * message limit and never by being too large to send. Counting
-		 * characters instead would make that guarantee hold for Latin text and
-		 * quietly fail for everything else. See `maxRequestBodySize`.
+		 * body cap, which is also bytes and is what ends a conversation. Counting
+		 * characters here instead would put the two caps in different units, so
+		 * the relationship between one message and the conversation it belongs to
+		 * would hold for Latin text and drift for everything else. See
+		 * `maxRequestBodySize`.
 		 *
-		 * @example if (message.content.length > CONFIG.validation.maxMessageLength)
+		 * @example if (role === 'user' && encoder.encode(content).length > CONFIG.validation.maxMessageLength)
 		 */
 		maxMessageLength: 4096,
 
 		/**
-		 * How long a single conversation may get, in messages. Reaching it ends
-		 * that conversation: the request is refused and the visitor starts a new
-		 * one. Nothing rolls over silently — an agent that quietly forgot the
-		 * first half of a conversation would be worse than one that says so.
-		 * @example if (messages.length > CONFIG.validation.maxMessagesPerRequest)
-		 */
-		maxMessagesPerRequest: 50,
-
-		/**
-		 * Largest request body accepted, in bytes.
+		 * Largest conversation accepted, in bytes — and therefore how long a
+		 * conversation may get.
 		 *
-		 * Sized so the message-count cap is always the binding one. Both caps are
-		 * in bytes, so the largest legitimate conversation is exactly
-		 * `maxMessageLength * maxMessagesPerRequest` = 200 KB of content, and
-		 * what remains covers the JSON envelope around it — measured at 201 KB
-		 * for a full conversation of Turkish text. That holds for a body encoded
-		 * as UTF-8, which is what `JSON.stringify` produces; a client that
-		 * escapes every non-ASCII character instead triples its own payload and
-		 * will meet this cap first. A lower cap would
-		 * reject a full conversation as oversized before the worker could tell
-		 * the client that the conversation is simply finished, and the client
-		 * treats those two refusals very differently.
+		 * This is the only length rule. A separate message count used to sit in
+		 * front of it, but the two measured the same thing twice: the client
+		 * replays the whole conversation on every turn, so the body IS the
+		 * conversation, and one cap decides both questions. Reaching it ends that
+		 * conversation and the visitor starts a new one; nothing rolls over
+		 * silently, because an agent that quietly forgot the first half of a
+		 * conversation would be worse than one that says so.
 		 *
-		 * @example if (contentLength > CONFIG.validation.maxRequestBodySize)
+		 * A full-length exchange is one 4 KB question plus one answer at
+		 * `claude.maxTokens` — 10.3 KB in English as measured, about 5.7 KB in
+		 * Turkish — so 256 KB is on the order of 18 exchanges in English and 27 in
+		 * Turkish, and far more ordinary ones. Raising `maxTokens` shortens
+		 * conversations here; the two move together. The figure is in bytes, like `maxMessageLength`, so
+		 * the two can be reasoned about together; it holds for a UTF-8 body,
+		 * which is what `JSON.stringify` produces, while a client that escapes
+		 * every non-ASCII character triples its own payload and meets this cap
+		 * sooner.
+		 *
+		 * @example if (read.reason === 'too-large') // the conversation is full
 		 */
 		maxRequestBodySize: 262144,
 	},
@@ -136,25 +151,6 @@ export const CONFIG = {
 		 * @example if (!CONFIG.session.expectedHostnames.includes(data.hostname))
 		 */
 		expectedHostnames: ['www.emrearas.com'],
-	},
-
-	/**
-	 * The day's token ceiling — the whole rate-limit model.
-	 *
-	 * Turnstile is the human gate. Beyond it nothing is metered per visitor or
-	 * per conversation: the agent is a feature of this site, not something sold
-	 * by the turn, and a visitor who asks a lot of questions is using it as
-	 * intended. The only ceiling is what the day costs.
-	 */
-	budget: {
-		/**
-		 * Maximum tokens across everyone, per UTC day. Invisible in normal
-		 * traffic; caps the worst day at a fixed cost. Measured on real
-		 * conversations, a question costs ~7-8.5K tokens, so this is on the
-		 * order of 250 questions a day for the whole site.
-		 * @example if ((await readDailyUsage(env)) >= CONFIG.budget.tokensPerDay)
-		 */
-		tokensPerDay: 2000000,
 	},
 
 	/**

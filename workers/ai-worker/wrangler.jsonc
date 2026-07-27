@@ -35,9 +35,19 @@
 		}
 	],
 	/**
+	 * Non-secret gateway settings. They are vars rather than secrets because
+	 * neither is a credential: the endpoint is a URL and the alias only names
+	 * which stored key the gateway should reach for. CF_AIG_TOKEN is the secret.
+	 */
+	"vars": {
+		"ANTHROPIC_BASE_URL": "https://gateway.ai.cloudflare.com/v1/87828472d0ce84b59c0d336a53783d84/emrearascom-site/anthropic",
+		"CF_AIG_KEY_ALIAS": "default"
+	},
+	/**
 	 * D1 Database — the conversation record and integrity chain
-	 * (conversation_logs) plus the daily token meter (daily_usage). Both are
-	 * required at runtime and both are created by the single schema migration.
+	 * (conversation_logs), the one table this worker has. It is required at
+	 * runtime and created by the single schema migration. Nothing here records
+	 * spend: AI Gateway holds the budget.
 	 * The commands below are for recreating the database elsewhere or working
 	 * locally.
 	 *
@@ -65,8 +75,16 @@
 	]
 	/**
 	 * Production Secrets (set via CLI):
-	 * npx wrangler secret put ANTHROPIC_API_KEY
 	 * npx wrangler secret put TURNSTILE_SECRET_KEY
+	 * npx wrangler secret put CF_AIG_TOKEN
+	 *
+	 * There is no ANTHROPIC_API_KEY. The model is reached only through AI
+	 * Gateway, which stores the Anthropic key itself and attaches it on the way
+	 * out — so CF_AIG_TOKEN is what protects it, while the `vars` block above
+	 * names which gateway (ANTHROPIC_BASE_URL) and which stored key
+	 * (CF_AIG_KEY_ALIAS). Without the endpoint and the token the worker refuses
+	 * to answer rather than reaching the model with no spend limit in front of
+	 * it.
 	 *
 	 * SESSION_SIGNING_KEY signs the session tokens and is never shown to a
 	 * client, so it only has to be long and random — generate and set it in

@@ -28,7 +28,11 @@ import type { Locale } from '../translations';
 
 class LlmsContextError extends Error {}
 
-/** How long the site context may take to arrive before the turn is refused. */
+/**
+ * How long one attempt at the site context may take. `getLlmsContext` retries
+ * once, so the ceiling a caller actually waits is twice this before the turn is
+ * refused.
+ */
 const FETCH_TIMEOUT_MS = 5_000;
 
 async function fetchOnce(url: string): Promise<string> {

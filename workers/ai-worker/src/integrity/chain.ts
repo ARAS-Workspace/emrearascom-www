@@ -137,8 +137,8 @@ export async function logConversationBlock(env: Env, block: ConversationBlock): 
 
 
 /**
- * SHA-256 of the client IP — pseudonymization for dashboard grouping
- * (reference-implementation behavior, kept by design).
+ * SHA-256 of the client IP — a grouping key for the dashboard
+ *
  * @example const ipHash = await hashIp(clientIp);
  */
 export async function hashIp(ip: string): Promise<string> {

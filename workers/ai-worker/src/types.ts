@@ -21,14 +21,29 @@ export interface Env {
 	AI_LOGS_DB: D1Database;
 
 	// Secrets
-	ANTHROPIC_API_KEY: string;
 	TURNSTILE_SECRET_KEY: string;
 	SESSION_SIGNING_KEY: string;
 
+	/**
+	 * AI Gateway access token — the only credential this worker holds for
+	 * reaching the model.
+	 *
+	 * There is no Anthropic key here. It lives in the gateway, which attaches it
+	 * on the way out, so this token is what stands between the internet and that
+	 * key: the gateway must be configured as authenticated, or anyone who learns
+	 * its URL can spend it.
+	 *
+	 * Optional in the type and required at runtime — a worker deployed without
+	 * it refuses to answer rather than falling back to an unmetered path.
+	 */
+	CF_AIG_TOKEN?: string;
+
 	// Vars
 	ENVIRONMENT?: string;
-	/** Optional Anthropic API base URL override (e.g. an AI Gateway endpoint). */
+	/** Gateway provider endpoint; required at runtime, see `CF_AIG_TOKEN`. */
 	ANTHROPIC_BASE_URL?: string;
+	/** Alias of the provider key stored in the gateway; unset means `default`. */
+	CF_AIG_KEY_ALIAS?: string;
 }
 
 // ============================================================================
@@ -91,7 +106,7 @@ export interface ValidationDetail {
 	message: string;
 }
 
-/** JSON error body: `{ error: { type, message, details? }, status, retryAfter? }`. */
+/** JSON error body: `{ error: { type, message, details? }, status }`. */
 export interface ErrorResponseBody {
 	error: {
 		type: ErrorType;
@@ -99,7 +114,6 @@ export interface ErrorResponseBody {
 		details?: ValidationDetail[];
 	};
 	status: number;
-	retryAfter?: number;
 }
 
 // ============================================================================
@@ -110,6 +124,12 @@ export interface SseDeltaEvent {
 	text: string;
 }
 
+/**
+ * Sent once the turn is in the chain, which is what makes it the signal the
+ * client waits for: transport EOF proves nothing on its own. This site's chat
+ * reads only that the event arrived. The fields are the turn's receipt, carried
+ * for any client that wants them and for reading a stream by hand.
+ */
 export interface SseDoneEvent {
 	id: string;
 	model: string;
@@ -161,7 +181,7 @@ export interface ConversationBlock {
 	user_message: string;
 	assistant_response: string;
 	locale: Locale;
-	/** SHA-256(ip) — pseudonymization for dashboard grouping. */
+	/** SHA-256(ip) — a grouping key for the dashboard. */
 	ip_hash: string | null;
 	model: string;
 	tokens_in: number;

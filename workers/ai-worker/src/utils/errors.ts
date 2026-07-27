@@ -14,17 +14,23 @@ import { corsHeaders } from '../cors';
 import type { Env, ErrorResponseBody, ErrorType, ValidationDetail } from '../types';
 
 /**
- * JSON error responses. The envelope is kept verbatim from the reference
- * implementation: `{ error: { type, message, details? }, status, retryAfter? }`.
- * This site's chat reads `error.type` and `error.message`: the type decides
- * whether a refusal is retryable or ends the conversation, so it is part of the
- * contract rather than decoration. `status`, `retryAfter` and `details` are
+ * JSON error responses: `{ error: { type, message, details? }, status }`.
+ *
+ * This site's chat reads `error.type`, `error.message` and `error.details`: the
+ * type decides whether a refusal is retryable or ends the conversation, and
+ * `details` carries the per-field reason for a validation refusal, which the
+ * chat shows in place of the envelope's own message whenever exactly one field
+ * is named. Both are part of the contract rather than decoration. `status` is
  * carried for other clients and rendered by none.
+ *
+ * There is no `retryAfter`. It used to carry the seconds until the worker's own
+ * daily meter rolled over, and that meter is gone — the ceiling belongs to the
+ * gateway now, whose window this worker does not know. A number invented here
+ * would be a guess printed with the authority of a fact.
  */
 
 interface ErrorOptions {
 	details?: ValidationDetail[];
-	retryAfter?: number;
 }
 
 /**
@@ -45,16 +51,11 @@ export function errorResponse(
 			...(options.details ? { details: options.details } : {}),
 		},
 		status,
-		...(options.retryAfter !== undefined ? { retryAfter: options.retryAfter } : {}),
 	};
 
 	const headers: Record<string, string> = {
 		'Content-Type': 'application/json; charset=utf-8',
 		...corsHeaders(request, env),
 	};
-	if (options.retryAfter !== undefined) {
-		headers['Retry-After'] = String(options.retryAfter);
-	}
-
 	return new Response(JSON.stringify(body, null, 2), { status, headers });
 }
