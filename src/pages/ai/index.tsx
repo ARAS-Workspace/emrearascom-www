@@ -44,7 +44,7 @@ const AIPage: React.FC = () => {
     <>
       <SEO {...meta.seo} path="/ai" />
 
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<LoadingSpinner fullpage />}>
         <MDXPageRenderer content={Body} />
       </Suspense>
     </>

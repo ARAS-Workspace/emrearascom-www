@@ -94,7 +94,7 @@ const BlogPost: React.FC<BlogPostProps> = ({ meta }) => {
 
         <div className="blog-post__body">
           {Body && (
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<LoadingSpinner fullpage />}>
               <MDXPageRenderer content={Body} />
             </Suspense>
           )}

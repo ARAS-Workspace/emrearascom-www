@@ -17,6 +17,15 @@
   }
 }
 
+// The in-layout sibling of the fullscreen container: header and footer stay
+// mounted, so a 100vh box would center against the viewport and push the
+// footer a whole screen down. This height centers the spinner in the content
+// region instead, sitting slightly above the mathematical middle. The floor
+// keeps short viewports from crushing the box.
+.loading-spinner-container--fullpage {
+  min-height: max(20rem, calc(100vh - 12rem));
+}
+
 .loading-spinner-content {
   display: flex;
   flex-direction: column;

@@ -43,7 +43,7 @@ const PrivacyPage: React.FC = () => {
     <>
       <SEO {...meta.seo} path="/privacy" />
 
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<LoadingSpinner fullpage />}>
         <MDXPageRenderer content={Body} />
       </Suspense>
     </>
