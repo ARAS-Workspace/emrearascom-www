@@ -20,7 +20,6 @@ import SignatureComponent from '@shared/components/ui/SignatureComponent';
 import KaratayLogo from '@shared/components/ui/KaratayLogo';
 import ArtekBilingualLogo from '@shared/components/ui/ArtekBilingualLogo';
 import PgpKey from '@shared/components/ui/PgpKey';
-import DinoGame from '@shared/components/games/DinoGame';
 import { useLocale } from '@shared/hooks';
 import { createPersonSchema, createProfilePageSchema } from '@shared/utils/schema-helpers';
 
@@ -267,12 +266,6 @@ const HomePage: React.FC = () => {
             {renderLinks(content.contact.links)}
           </Column>
         </Grid>
-
-        {/* Easter egg — the Phantom-ghost runner, unlabeled at the very bottom,
-            right below contact (Phantom quickstart preset: theme="dpi-phantom"). */}
-        <div className="home-easter-egg">
-          <DinoGame.Lazy theme="dpi-phantom" />
-        </div>
       </section>
     </>
   );
