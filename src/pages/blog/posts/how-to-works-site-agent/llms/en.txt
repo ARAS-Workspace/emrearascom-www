@@ -1,0 +1,120 @@
+> **emrearas.com — machine-readable page content.**
+>
+> **EN:** Auto-generated from this page's MDX source. Interactive components
+> (diagrams, figures, the chat widget) are replaced by their source
+> data or a short directive — read those as data pointers, not missing content.
+>
+> **TR:** Bu sayfanın MDX kaynağından otomatik üretildi. İnteraktif bileşenler
+> (diyagram, görsel, sohbet aracı) kaynak verisiyle veya kısa bir
+> direktifle değiştirildi — eksik içerik değil, veri işaretçisi olarak okuyun.
+
+**path:** /blog/how-to-works-site-agent · **locale:** en · **tr:** https://www.emrearas.com/blog/how-to-works-site-agent/llms.txt?locale=tr
+
+# How Does the Site Agent Work?
+
+In the [Hello World](/blog/hello-world) post I described how this blog works. This post covers another part of the site: the agent that greets you on the [AI page](/ai).
+
+The agent is a chat assistant that answers your questions about this site. It knows my projects, my writing and the technical architecture, speaks two languages and is open to everyone. The subject of this post is not the agent itself but the system standing behind it, the one that keeps it running at a low cost.
+
+## What Is the Site Agent?
+
+The agent lives on the [AI page](/ai). Its answers are produced by **Anthropic**'s `claude-haiku-4-5` model. You do not need to open an account, sign in or pay for anything. The only thing asked of you is to verify once, before the conversation starts, that you are human (**Cloudflare Turnstile**).
+
+Offering a public and free AI agent is an ambitious piece of engineering. Every message produces a real cost. That cost has to be carried by the developer or the agent's owner.
+
+This is why every decision in the system's design answers two questions:
+
+- How is the visitor given a seamless experience?
+- How is that experience kept sustainable against abuse?
+
+## How Does It Work?
+
+The system consists of five layers. Each layer has a single job, and none of them takes over another's:
+
+- **Chat Interface** ([ai-chat](https://github.com/ARAS-Workspace/emrearascom-www/tree/372b44e4940024942cca8d985f36b2efea5b315b/src/shared/components/ai-chat)). Built on the chat component of the **IBM Carbon** design system and runs entirely in your browser.
+- **Cloudflare Turnstile**. Performs a single human verification per session. In return the **Worker** gives you a short-lived, signed session key; every later message arrives with it. Security and user experience are fairly balanced here; that balance is the real lesson to take from this adaptation.
+- **Worker** ([workers/ai-worker](https://github.com/ARAS-Workspace/emrearascom-www/tree/372b44e4940024942cca8d985f36b2efea5b315b/workers/ai-worker)). The backbone of the system. It validates the session, checks the message, verifies the conversation chain, streams the answer to you and writes the turn to the record.
+- **AI Gateway**. The **Cloudflare** layer standing between the **Worker** and the model. The model key is stored only here and attached to the request on its way out. Spending ceilings, the rate limit and the content protections also operate here.
+- **D1**. The database where the conversation records live. Every turn is written here as a block of the chain I will describe in the next section.
+
+### The Journey of a Message
+
+The road from the moment you press send to the last word of the answer is this:
+
+1. Your message reaches the **Worker** together with your session key.
+2. The **Worker** verifies the key's signature and expiry. If the key is missing or expired, the conversation returns to a fresh verification.
+3. The message is checked: its size and shape must be within limits.
+4. The digest of your conversation history is compared against the chain on the server. If the history has been tampered with, the request is rejected before the model is ever involved.
+5. The request passes through the **AI Gateway**. Content protections and spending ceilings are applied here, and the secret model key is attached here.
+6. **Claude** starts producing the answer, and it streams into your browser word by word.
+7. When the answer completes, the turn is appended to the conversation chain as a new block. The record closes only after that write has finished.
+
+```mermaid
+sequenceDiagram
+  participant V as Visitor
+  participant W as Worker
+  participant G as AI Gateway
+  participant C as Claude
+  participant D as D1
+  V->>W: Message + Session Key
+  W->>W: Validation and Chain Check
+  W->>G: Request (No Key)
+  G->>G: Protections and Ceilings
+  G->>C: Request (Stored Key Attached)
+  C-->>W: Response Stream
+  W-->>V: Word by Word Response
+  W->>D: Write the Turn to the Chain
+```
+
+## The Integrity of a Conversation: the Hash Chain
+
+To me, this is the most interesting part of the system. Every conversation you have with the agent is recorded; I state this openly on the [Privacy Notice](/privacy) page.
+
+This structure records conversations whole and separated per session, without keeping any value on the front end that would create an additional, manipulable surface.
+
+What makes this possible is the way the records are linked together. Every turn is a block, and every block carries three digests:
+
+- **block\_hash**. The SHA-256 digest of the block's entire content.
+- **prev\_hash**. The digest of the previous block. This is the link that forms the chain.
+- **context\_hash**. The digest of the conversation context up to that point. This is a conversation's identity and continuity.
+
+If a block's content is changed later, its digest no longer matches the stored value and the link of every block after it breaks. The change cannot be hidden, only made visible. That is exactly the record's value: it is proof that the conversation happened that day, in that form, and proof that conversations are systematically separated from one another.
+
+This design has two pleasant side effects. First, the continuity of a conversation is decided neither by a cookie nor by your IP address; it is decided by the digest of the context. When you change networks, for example while your phone wanders between cell towers, the conversation continues uninterrupted. Second, arriving with a fabricated history achieves nothing: a context with no counterpart in the chain is rejected before the model is ever involved, and not a single token is spent.
+
+If you continue the same conversation from two tabs, the chain branches. The record is therefore not a flat list but a tree, and it is read by following the `prev_hash` trail rather than a sequence number. The tool that performs this verification also lives in the open source repository: [tools/ai-dashboard](https://github.com/ARAS-Workspace/emrearascom-www/tree/372b44e4940024942cca8d985f36b2efea5b315b/tools/ai-dashboard) re-hashes every block, compares it against the stored value and then presents the messages in a readable interface.
+
+## Limits and Protections
+
+A free endpoint stays sustainable by being open about its limits:
+
+- **Spending Ceilings**. There are daily and monthly ceilings. When a ceiling is reached, the agent politely turns new requests away and picks up where it left off the next day.
+- **Rate Limit**. Requests are limited within a per-minute window.
+- **Content Protections**. Every request passes through moderation before it reaches the model. Requests falling into inappropriate categories are never processed, and responses are flagged and observed.
+- **Data Protection**. Messages carrying sensitive data, such as financial numbers, are not processed. Such a message neither reaches the model nor enters the record; the shortest way to protect your data is not to take it at all.
+- **Size Limits**. A single message and the total length of a conversation are bounded. A conversation that reaches the limit hands over to a new one.
+
+None of these limits adds rule weight to the **Worker**. All of them operate in the **AI Gateway** layer. The **Worker** only does its own job. The purpose of the limits is not to restrict the agent but to keep a public endpoint safely open.
+
+## Privacy
+
+Conversations with the agent are recorded so that its performance can be measured and its output observed. What is recorded, what is not, and how you can ask for your records to be deleted are all explained on the [Privacy Notice](/privacy) page. The short summary is this: the history in your browser is yours and is deleted with a single button; the record on the server is the chain I described above.
+
+## The Agent's Source of Knowledge: llms.txt
+
+Everything the agent knows about the site comes from the site's machine-readable text. The pipeline I described in the [Hello World](/blog/hello-world) post derives an `llms.txt` version of every page and joins them into a single document. The text placed in front of the agent in every conversation is identical to the one publicly available at [llms-full.txt](/llms-full.txt). An efficient and plain method was preferred here, because the site's content is sufficiently visible through `llms-full.txt`. A small body of data that is easy and fast to reach brings natural advantages with it. When a new post is published, this file is regenerated and the agent is updated at the same moment as the site.
+
+## License
+
+This site and its source code are available under the GNU Affero General Public License, version 3.0 or later (AGPL-3.0-or-later).
+
+## Open Source
+
+| Source                                             | Address                                                                                                                    |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Personal Account                                   | [github.com/remrearas](https://github.com/remrearas)                                                                       |
+| Organisation (ARAS-Workspace)                      | [github.com/ARAS-Workspace](https://github.com/ARAS-Workspace)                                                             |
+| emrearascom-www (This Site)                        | [github.com/ARAS-Workspace/emrearascom-www](https://github.com/ARAS-Workspace/emrearascom-www)                             |
+| Worker                                             | [workers/ai-worker](https://github.com/ARAS-Workspace/emrearascom-www/tree/main/workers/ai-worker)                         |
+| React Interface Component                          | [src/shared/components/ai-chat](https://github.com/ARAS-Workspace/emrearascom-www/tree/main/src/shared/components/ai-chat) |
+| AI Dashboard (Chat History and Chain Verification) | [tools/ai-dashboard](https://github.com/ARAS-Workspace/emrearascom-www/tree/main/tools/ai-dashboard)                       |

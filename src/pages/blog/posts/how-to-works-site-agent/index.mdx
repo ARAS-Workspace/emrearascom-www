@@ -1,0 +1,108 @@
+import Mermaid from "@shared/components/visualization/Mermaid.tsx";
+
+[Merhaba Dünya](/blog/hello-world) yazısında bu blogun nasıl çalıştığını anlatmıştım. Bu yazıda sitenin bir başka parçasını ele alacağım: [AI sayfasında](/ai) sizi karşılayan site ajanı.
+
+Ajan, bu site hakkında sorularınızı cevaplayan bir sohbet asistanıdır. Projelerimi, yazılarımı ve teknik mimariyi bilir, iki dilde konuşur ve herkese açıktır. Bu yazının konusu ise ajanın kendisi değil, arkasında duran ve onu düşük maliyetle ayakta tutan sistemdir.
+
+## Site Ajanı Nedir?
+
+Ajan [AI sayfasında](/ai) yaşar. Cevapları **Anthropic**'in `claude-haiku-4-5` modeli üretir. Hesap açmanız, giriş yapmanız veya bir şey ödemeniz gerekmez. Tek istenen, konuşmaya başlamadan önce bir kez insan olduğunuzu doğrulamanızdır (**Cloudflare Turnstile**).
+
+Herkese açık ve ücretsiz bir yapay zeka ajanı sunmak, mühendislik açısından iddialı bir iştir. Her mesaj gerçek bir maliyet üretir. Bu maliyetin geliştirici veya ajanın sahibi tarafından üstlenilmesi gerekir.
+
+Bu yüzden sistemin tasarımındaki her karar iki sorunun cevabıdır:
+
+- Ziyaretçiye pürüzsüz bir deneyim nasıl verilir?
+- Bu deneyim kötüye kullanıma karşı nasıl sürdürülebilir kılınır?
+
+## Nasıl Çalışıyor?
+
+Sistem beş katmandan oluşur. Her katmanın tek bir işi vardır ve hiçbiri diğerinin işini üstlenmez:
+
+- **Sohbet Arayüzü** ([ai-chat](https://github.com/ARAS-Workspace/emrearascom-www/tree/372b44e4940024942cca8d985f36b2efea5b315b/src/shared/components/ai-chat)). **IBM Carbon** tasarım sisteminin sohbet bileşeni üzerine kuruludur ve tamamen tarayıcınızda çalışır.
+- **Cloudflare Turnstile**. Oturum başına tek insan doğrulaması yapar. Karşılığında **Worker** size kısa ömürlü, imzalı bir oturum anahtarı verir; sonraki her mesaj bu anahtarla gelir. Burada güvenlik ile kullanıcı deneyimi adil bir şekilde dengelenmiştir; bu uyarlamadan çıkarılacak asıl ders de budur.
+- **Worker** ([workers/ai-worker](https://github.com/ARAS-Workspace/emrearascom-www/tree/372b44e4940024942cca8d985f36b2efea5b315b/workers/ai-worker)). Sistemin omurgasıdır. Oturumu doğrular, mesajı sınar, konuşma zincirini kontrol eder, cevabı size akıtır ve turu kayda geçirir.
+- **AI Gateway**. **Worker** ile model arasında duran **Cloudflare** katmanıdır. Model anahtarı yalnızca burada saklanır ve isteğe çıkış anında eklenir. Harcama tavanları, hız sınırı ve içerik korumaları da burada işler.
+- **D1**. Konuşma kayıtlarının durduğu veritabanıdır. Her tur, bir sonraki bölümde anlatacağım zincirin bir bloğu olarak buraya yazılır.
+
+### Bir Mesajın Yolculuğu
+
+Gönder düğmesine bastığınız andan cevabın son kelimesine kadar olan yol şudur:
+
+1. Mesajınız, oturum anahtarınızla birlikte **Worker**'a ulaşır.
+2. **Worker** anahtarın imzasını ve süresini doğrular. Anahtar yoksa veya süresi geçmişse konuşma yeni bir doğrulamaya döner.
+3. Mesaj sınanır: boyutu ve biçimi sınırlar içinde olmalıdır.
+4. Konuşma geçmişinizin özeti, sunucudaki zincirle karşılaştırılır. Geçmiş oynanmışsa istek daha model devreye girmeden reddedilir.
+5. İstek **AI Gateway** üzerinden geçer. İçerik korumaları ve harcama tavanları burada uygulanır, gizli model anahtarı isteğe burada eklenir.
+6. **Claude** cevabı üretmeye başlar ve cevap tarayıcınıza kelime kelime akar.
+7. Cevap tamamlanınca tur, konuşma zincirine yeni bir blok olarak eklenir. Kayıt ancak bu yazma işlemi bittikten sonra kapanır.
+
+<Mermaid
+  chart={`sequenceDiagram
+    participant V as Ziyaretçi
+    participant W as Worker
+    participant G as AI Gateway
+    participant C as Claude
+    participant D as D1
+    V->>W: Mesaj + Oturum Anahtarı
+    W->>W: Doğrulama ve Zincir Kontrolü
+    W->>G: İstek (Anahtarsız)
+    G->>G: Korumalar ve Tavanlar
+    G->>C: İstek (Saklı Anahtar Eklenir)
+    C-->>W: Yanıt Akışı
+    W-->>V: Kelime Kelime Yanıt
+    W->>D: Turu Zincire Yaz`}
+/>
+
+## Konuşmanın Bütünlüğü: Hash Zinciri
+
+Sistemin bence en ilginç parçası burasıdır. Ajanla yaptığınız her konuşma kaydedilir; bunu [Gizlilik Bildirimi](/privacy) sayfasında açıkça yazdım.
+
+Bu yapı, sistemin ön yüzünde ek ve manipüle edilebilir bir yüzey oluşturacak bir değer tutmadan, konuşmaların bütün halinde ve oturum bazında ayrılmış olarak kaydedilmesini sağlar.
+
+Bunu mümkün kılan, kayıtların birbirine bağlanma biçimidir. Her tur bir bloktur ve her blok üç özet taşır:
+
+- **block_hash**. Bloğun tüm içeriğinin SHA-256 özeti.
+- **prev_hash**. Önceki bloğun özeti. Zinciri kuran bağ budur.
+- **context_hash**. O ana kadarki konuşma bağlamının özeti. Bir konuşmanın kimliği ve sürekliliği budur.
+
+Bir bloğun içeriği sonradan değiştirilirse özeti artık saklanan değerle eşleşmez ve ondan sonraki her bloğun bağı kopar. Değişiklik gizlenemez, ancak görünür hale gelir. Kaydın değeri de tam olarak budur: konuşmanın o gün, o haliyle geçtiğinin kanıtı ve konuşmaların birbirinden sistematik olarak ayrıldığının ispatıdır.
+
+Bu tasarımın iki güzel yan etkisi vardır. Birincisi, konuşmanın sürekliliğini ne bir çerez ne de IP adresiniz belirler; bağlamın özeti belirler. Ağ değiştirdiğinizde, örneğin telefonunuz baz istasyonları arasında gezerken, konuşmanız kesintisiz sürer. İkincisi, uydurma bir geçmişle gelmek işe yaramaz: zincirde karşılığı olmayan bir bağlam, daha model devreye girmeden reddedilir ve tek bir token harcanmaz.
+
+Aynı konuşmayı iki sekmeden sürdürürseniz zincir dallanır. Kayıt bu yüzden düz bir liste değil, bir ağaçtır ve okunurken sıra numarasına göre değil, `prev_hash` izi sürülerek okunur. Bu doğrulamayı yapan araç da açık kaynak kod deposunda yer alır: [tools/ai-dashboard](https://github.com/ARAS-Workspace/emrearascom-www/tree/372b44e4940024942cca8d985f36b2efea5b315b/tools/ai-dashboard), her bloğu yeniden hash'leyip saklanan değerle karşılaştırır, ardından mesajları okunabilir bir arayüz üzerinde sunar.
+
+## Sınırlar ve Korumalar
+
+Ücretsiz bir ucun sürdürülebilir olması, sınırlarının açık olmasına bağlıdır:
+
+- **Harcama Tavanları**. Günlük ve aylık tavanlar vardır. Tavana ulaşıldığında ajan yeni istekleri kibarca geri çevirir ve ertesi gün kaldığı yerden devam eder.
+- **Hız Sınırı**. İstekler dakikalık bir pencereyle sınırlıdır.
+- **İçerik Korumaları**. Her istek modele ulaşmadan önce moderasyondan geçer. Uygunsuz kategorilere giren istekler hiç işlenmez, cevaplar ise işaretlenerek izlenir.
+- **Veri Koruması**. Finansal numara gibi hassas veriler taşıyan mesajlar işlenmez. Böyle bir mesaj ne modele gider ne de kayda geçer; kendi verinizi korumanın en kestirme yolu, onu hiç almamaktır.
+- **Boyut Sınırları**. Tek bir mesajın ve konuşmanın toplam uzunluğunun sınırı vardır. Sınıra ulaşan konuşma yeni bir konuşmaya devredilir.
+
+Bu sınırların hiçbiri **Worker** tarafına ek kural yükü getirmez. Hepsi **AI Gateway** katmanında işlenir. **Worker** yalnızca kendi işini yapar. Sınırların amacı ajanı kısıtlamak değil, herkese açık bir ucu güvenle açık tutabilmektir.
+
+## Gizlilik
+
+Ajanla yaptığınız konuşmalar, performansı ölçebilmek ve çıktıları gözlemleyebilmek için kaydedilir. Neyin kaydedildiğini, neyin kaydedilmediğini ve kayıtlarınızın silinmesini nasıl isteyebileceğinizi [Gizlilik Bildirimi](/privacy) sayfasında bulabilirsiniz. Kısa özet şudur: tarayıcınızdaki geçmiş sizindir ve tek düğmeyle silinir; sunucudaki kayıt ise yukarıda anlattığım zincirin kendisidir.
+
+## Ajanın Bilgi Kaynağı: llms.txt
+
+Ajanın site hakkında bildiği her şey, sitenin makine-okunur metninden gelir. [Merhaba Dünya](/blog/hello-world) yazısında anlattığım üretim hattı, her sayfanın bir `llms.txt` sürümünü türetir ve hepsini tek bir belgede birleştirir. Ajanın her konuşmada önüne konan metin, [llms-full.txt](/llms-full.txt) adresinde herkese açık duran metnin aynısıdır. Burada verimli ve yalın bir yöntem tercih edilmiştir; çünkü sitenin içeriği `llms-full.txt` üzerinden yeterince görünür durumdadır. Kolay ve hızlı erişilebilir küçük bir veri bütünü, beraberinde doğal avantajlar getirir. Yeni bir yazı yayınlandığında bu dosya yeniden üretilir ve ajan, siteyle aynı anda güncellenmiş olur.
+
+## Lisans
+
+Bu site ve kaynak kodu, GNU Affero General Public License sürüm 3.0 veya sonrası (AGPL-3.0-or-later) kapsamında sunulmaktadır.
+
+## Açık Kaynak
+
+| Kaynak                                                   | Adres                                                                                                                      |
+|----------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| Kişisel Hesap                                            | [github.com/remrearas](https://github.com/remrearas)                                                                       |
+| Organizasyon (ARAS-Workspace)                            | [github.com/ARAS-Workspace](https://github.com/ARAS-Workspace)                                                             |
+| emrearascom-www (Bu Site)                                | [github.com/ARAS-Workspace/emrearascom-www](https://github.com/ARAS-Workspace/emrearascom-www)                             |
+| Worker                                                   | [workers/ai-worker](https://github.com/ARAS-Workspace/emrearascom-www/tree/main/workers/ai-worker)                         |
+| React Arayüz Bileşeni                                    | [src/shared/components/ai-chat](https://github.com/ARAS-Workspace/emrearascom-www/tree/main/src/shared/components/ai-chat) |
+| AI Dashboard (Sohbet Geçmişi ve Zincir Doğrulama)        | [tools/ai-dashboard](https://github.com/ARAS-Workspace/emrearascom-www/tree/main/tools/ai-dashboard)                       |

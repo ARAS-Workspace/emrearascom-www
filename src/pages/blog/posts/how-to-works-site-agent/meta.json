@@ -1,0 +1,19 @@
+{
+  "kv": {
+    "createdAt": "28/07/2026 12:00",
+    "updatedAt": "28/07/2026 12:00"
+  },
+  "author": "Rıza Emre ARAS",
+  "seo": {
+    "tr": {
+      "title": "Site Ajanı Nasıl Çalışıyor?",
+      "description": "Site ajanının mimarisi ve konuşma kayıtlarının bütünlük tasarımı",
+      "tags": ["Blog", "Yapay Zeka", "Mimari", "Site Ajanı"]
+    },
+    "en": {
+      "title": "How Does the Site Agent Work?",
+      "description": "The site agent's architecture and the integrity design of its conversation records",
+      "tags": ["Blog", "AI", "Architecture", "Site Agent"]
+    }
+  }
+}
