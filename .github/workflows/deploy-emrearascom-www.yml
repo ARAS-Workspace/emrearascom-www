@@ -114,6 +114,15 @@ jobs:
       - name: Build and prerender
         run: npm run prod
 
+      - name: Test the worker contract
+        # scripts/test-worker.js starts `wrangler pages dev` on the dist/ that
+        # was just built — fully local, no credentials — and asserts the
+        # worker's documented six-stage contract, edge cases included. It also
+        # gates prerender completeness: a missing variant fails the negotiation
+        # tests. Red here means the artifact would ship broken, so it must stop
+        # the deploy that follows.
+        run: npm run test:worker
+
       - name: Deploy to Cloudflare Pages
         # npm run deploy = wrangler pages deploy dist --branch main, targeting the
         # `emrearascom-www` project (wrangler.jsonc `name`) → www.emrearas.com.

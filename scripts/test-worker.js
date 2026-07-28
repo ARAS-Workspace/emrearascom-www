@@ -43,7 +43,9 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const PORT = 8790;
+// Overridable for the one environment the suite shares with other work — the
+// self-hosted CI runner — so a port collision is a one-line workflow fix.
+const PORT = Number(process.env.TEST_WORKER_PORT) || 8790;
 
 const urlFlag = process.argv.indexOf('--url');
 const EXTERNAL = urlFlag !== -1 ? process.argv[urlFlag + 1].replace(/\/$/, '') : null;
